@@ -9,6 +9,7 @@ namespace TheSTAR.Input
     public class JoystickContainer : MonoBehaviour
     {
         [SerializeField] private Pointer pointer;
+        [SerializeField] private GameObject joystickObject;
         [SerializeField] private GameObject stickObject;
         [SerializeField] private float limitDistance = 50;
 
@@ -33,6 +34,8 @@ namespace TheSTAR.Input
         private void OnJoystickDown()
         {
             _isDown = true;
+            joystickObject.SetActive(true);
+            joystickObject.transform.position = UnityEngine.Input.mousePosition;
             UpdateStickPosByMouse();
         }
     
@@ -46,6 +49,7 @@ namespace TheSTAR.Input
         {
             _isDown = false;
             stickObject.transform.localPosition = Vector2.zero;
+            joystickObject.SetActive(false);
         }
 
         private void UpdateStickPosByMouse()
