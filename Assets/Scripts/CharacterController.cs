@@ -3,17 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 public class CharacterController : MonoBehaviour
 {
-    [SerializeField] private NavMeshAgent _meshAgent;
+    [SerializeField] private NavMeshAgent meshAgent;
 
-    private void Update()
+    public void SetDirection(Vector2 moveDirection)
     {
-        var x = Input.GetAxis("Horizontal");
-        var z = Input.GetAxis("Vertical");
-
-        var movePosition = transform.position + new Vector3(x, 0, z);
-        _meshAgent.SetDestination(movePosition);
+        var movePos = new Vector3(transform.position.x + moveDirection.x, 0, transform.position.z + moveDirection.y);
+        meshAgent.SetDestination(movePos);
     }
 }

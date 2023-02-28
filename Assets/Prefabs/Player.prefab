@@ -1049,7 +1049,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4066213798c54300bebef13fda06e7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _meshAgent: {fileID: 7452998440400282465}
+  meshAgent: {fileID: 7452998440400282465}
 --- !u!1 &7452998440533985932
 GameObject:
   m_ObjectHideFlags: 0
