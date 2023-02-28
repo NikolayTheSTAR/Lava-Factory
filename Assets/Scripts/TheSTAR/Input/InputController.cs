@@ -20,7 +20,7 @@ namespace TheSTAR.Input
             forceX = direction.x;
             forceY = direction.y;
             
-            character.SetDirection(direction);
+            character.SetDestination(direction);
         }
     }
 }

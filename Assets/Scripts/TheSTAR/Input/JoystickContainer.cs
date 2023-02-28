@@ -25,25 +25,27 @@ namespace TheSTAR.Input
             _joystickInputAction = joystickInoutAction;
         }
 
+        private void Update()
+        {
+            JoystickInput();
+        }
+
         private void OnJoystickDown()
         {
             _isDown = true;
             UpdateStickPosByMouse();
-            JoystickInput();
         }
     
         private void OnJoystickDrag()
         {
             _isDown = true;
             UpdateStickPosByMouse();
-            JoystickInput();
         }
     
         private void OnJoystickUp()
         {
             _isDown = false;
             stickObject.transform.localPosition = Vector2.zero;
-            JoystickInput();
         }
 
         private void UpdateStickPosByMouse()
