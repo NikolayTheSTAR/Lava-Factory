@@ -9,12 +9,15 @@ namespace TheSTAR.Input
     public class JoystickContainer : MonoBehaviour
     {
         [SerializeField] private Pointer pointer;
-        [SerializeField] private GameObject joystickObject;
+        [SerializeField] private CanvasGroup joystickCanvasGroup;
         [SerializeField] private GameObject stickObject;
-        [SerializeField] private float limitDistance = 50;
+        
+        private const float LimitDistance = 120;
+        private const float ShowTime = 0.1f;
 
         private Action<Vector2> _joystickInputAction;
         private bool _isDown = false;
+        private int _showHideLTID = -1;
 
         public void Init(Action<Vector2> joystickInoutAction)
         {
@@ -34,8 +37,7 @@ namespace TheSTAR.Input
         private void OnJoystickDown()
         {
             _isDown = true;
-            joystickObject.SetActive(true);
-            joystickObject.transform.position = UnityEngine.Input.mousePosition;
+            ShowJoystick();
             UpdateStickPosByMouse();
         }
     
@@ -48,20 +50,50 @@ namespace TheSTAR.Input
         private void OnJoystickUp()
         {
             _isDown = false;
-            stickObject.transform.localPosition = Vector2.zero;
-            joystickObject.SetActive(false);
+            HideJoystick();
         }
 
         private void UpdateStickPosByMouse()
         {
             stickObject.transform.position = UnityEngine.Input.mousePosition;
-            stickObject.transform.localPosition = MathUtility.LimitForCircle(stickObject.transform.localPosition, limitDistance);
+            stickObject.transform.localPosition = MathUtility.LimitForCircle(stickObject.transform.localPosition, LimitDistance);
         }
 
         private void JoystickInput()
         {
-            if (_isDown) _joystickInputAction?.Invoke(stickObject.transform.localPosition / limitDistance);
+            if (_isDown) _joystickInputAction?.Invoke(stickObject.transform.localPosition / LimitDistance);
             else _joystickInputAction?.Invoke(Vector2.zero);
         }
+
+        #region Show/Hide
+
+        private void ShowJoystick()
+        {
+            if (_showHideLTID != -1) LeanTween.cancel(_showHideLTID);
+            
+            joystickCanvasGroup.transform.position = UnityEngine.Input.mousePosition;
+            joystickCanvasGroup.gameObject.SetActive(true);
+            joystickCanvasGroup.alpha = 0;
+            
+            _showHideLTID =
+            LeanTween.alphaCanvas(joystickCanvasGroup, 1, ShowTime).setOnComplete(() =>
+            {
+                _showHideLTID = -1;
+            }).id;
+        }
+
+        private void HideJoystick()
+        {
+            if (_showHideLTID != -1) LeanTween.cancel(_showHideLTID);
+
+            _showHideLTID =
+            LeanTween.alphaCanvas(joystickCanvasGroup, 0, ShowTime).setOnComplete(() =>
+            {
+                _showHideLTID = -1;
+                joystickCanvasGroup.gameObject.SetActive(false);
+            }).id;
+        }
+
+        #endregion
     }
 }
