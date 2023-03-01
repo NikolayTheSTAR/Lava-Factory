@@ -6,21 +6,21 @@ namespace World
 {
     public class ResourceSource : MonoBehaviour
     {
-        [SerializeField] private PlayerEntranceTrigger trigger;
+        //[SerializeField] private EntranceTrigger trigger;
 
         public void Init()
         {
-            trigger.Init(OnEnter, OnExit);
+            //trigger.Init(OnEnter, OnExit);
         }
 
-        private void OnEnter()
+        private void OnEnter(Collider other)
         {
-            AnimateMine();
+            //if (other.CompareTag("Player")) AnimateMine();
         }
         
-        private void OnExit()
+        private void OnExit(Collider other)
         {
-            StopAnim();
+            //if (other.CompareTag("Player")) StopAnim();
         }
 
         #region Anim

@@ -24,6 +24,7 @@ namespace World
         {
             var playerPrefab = Resources.Load<Player>(PlayerPrefabPath);
             CurrentPlayer = Instantiate(playerPrefab, playerSpawnPoint.position, Quaternion.identity, transform);
+            CurrentPlayer.Init();
         }
     }
 }
