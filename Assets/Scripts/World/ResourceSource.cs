@@ -18,7 +18,11 @@ namespace World
         
         public void TakeHit()
         {
-            if (animLTID != -1) LeanTween.cancel(animLTID);
+            if (animLTID != -1)
+            {
+                LeanTween.cancel(animLTID);
+                transform.localScale = Vector3.one;
+            }
             
             animLTID =
             LeanTween.scaleY(gameObject, 0.85f, 0.1f).setOnComplete(() =>

@@ -89,7 +89,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         if (_animLTID != -1) LeanTween.cancel(_animLTID);
 
-        var animTimeMultiply = mineStrikePeriod > DefaultMineStrikeTime ? 1 : (mineStrikePeriod / DefaultMineStrikeTime);
+        var animTimeMultiply = mineStrikePeriod > DefaultMineStrikeTime ? 1 : (mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
         
         _animLTID =
             LeanTween.scaleY(gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>

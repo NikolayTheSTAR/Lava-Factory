@@ -30,13 +30,13 @@ namespace World
 
             void FlyToPlayer()
             {
-                //LeanTween.move(item.gameObject, _playerDropReceiver.transform.position, FlyToReceiverTime)
                 LeanTween.value(0, 1, FlyToReceiverTime).setOnUpdate((value) =>
                 {
                     var difference = _playerDropReceiver.transform.position - startPos;
                     item.transform.position = startPos + value * (difference);
-
-                    var dopValueY = Math.Abs((value * value - value)*2 * difference.x);
+                    
+                    // physic imitation
+                    var dopValueY = Math.Abs((value * value - value) * 2 * difference.x);
                     item.transform.position += new Vector3(0, dopValueY, 0);
 
                 }) .setOnComplete(() =>
