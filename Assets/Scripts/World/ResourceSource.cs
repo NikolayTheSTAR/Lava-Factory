@@ -6,26 +6,15 @@ namespace World
 {
     public class ResourceSource : MonoBehaviour
     {
-        //[SerializeField] private EntranceTrigger trigger;
-
-        public void Init()
-        {
-            //trigger.Init(OnEnter, OnExit);
-        }
-
-        private void OnEnter(Collider other)
-        {
-            //if (other.CompareTag("Player")) AnimateMine();
-        }
-        
-        private void OnExit(Collider other)
-        {
-            //if (other.CompareTag("Player")) StopAnim();
-        }
-
-        #region Anim
+        [SerializeField] private ResourceItem itemPrefab;
 
         private int animLTID = -1;
+        private Action<ResourceItem, Vector3> _dropItemAction;
+
+        public void Init(Action<ResourceItem, Vector3> dropItemAction)
+        {
+            _dropItemAction = dropItemAction;
+        }
         
         public void TakeHit()
         {
@@ -37,8 +26,8 @@ namespace World
                 animLTID =
                 LeanTween.scaleY(gameObject, 1f, 0.2f).id;
             }).id;
-        }
 
-        #endregion
+            _dropItemAction?.Invoke(itemPrefab, transform.position + new Vector3(0, 3 ,-2));
+        }
     }
 }

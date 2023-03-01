@@ -6,6 +6,7 @@ namespace World
     {
         [SerializeField] private Transform playerSpawnPoint;
         [SerializeField] private ResourceSource[] sources = new ResourceSource[0];
+        [SerializeField] private DropItemsContainer dropItemsContainer;
 
         private const string PlayerPrefabPath = "Player";
     
@@ -16,8 +17,10 @@ namespace World
         {
             if (CurrentPlayer != null) Destroy(CurrentPlayer);
             SpawnPlayer();
-
-            foreach (var source in sources) source.Init();
+            
+            dropItemsContainer.Init(CurrentPlayer);
+            
+            foreach (var source in sources) source.Init(dropItemsContainer.DropItemToPlayer);
         }
     
         private void SpawnPlayer()

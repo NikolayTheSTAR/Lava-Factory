@@ -7,7 +7,7 @@ using UnityEngine.AI;
 using UnityEngine.Serialization;
 using World;
 
-public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled
+public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
