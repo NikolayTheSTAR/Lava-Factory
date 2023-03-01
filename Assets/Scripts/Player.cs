@@ -50,6 +50,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled
     
     private void OnExit(Collider other)
     {
+        if (!other.CompareTag("Source")) return;
+        var r = other.GetComponent<ResourceSource>();
+        if (r == null) return;
         StopMining();
     }
 
