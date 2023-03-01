@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
     
     public void FocusTo(ICameraFocusable focus)
     {
-        virtualCamera.m_Follow = focus.transform;
+        virtualCamera.m_Follow = focus?.transform;
     }
 }
 

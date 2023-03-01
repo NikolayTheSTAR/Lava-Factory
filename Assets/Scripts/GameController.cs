@@ -1,5 +1,6 @@
 using TheSTAR.Input;
 using UnityEngine;
+using World;
 
 public class GameController : MonoBehaviour
 {
@@ -19,6 +20,6 @@ public class GameController : MonoBehaviour
     {
         world.Init();
         cameraController.FocusTo(world.CurrentPlayer);
-        inputController.Init(world.CurrentPlayer.SetDestination);
+        inputController.Init(world.CurrentPlayer);
     }
 }
