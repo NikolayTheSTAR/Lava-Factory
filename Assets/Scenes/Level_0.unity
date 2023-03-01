@@ -11611,6 +11611,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47b7bf26d78d246f29fb0c8e6ed10968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testItemPrefab: {fileID: -7297246828576578938, guid: cab6564a998dc4018a587aad585929b0, type: 3}
   DropWaitTime: 0.2
   FlyToReceiverTime: 0.5
 --- !u!1 &1943110950

@@ -9,9 +9,9 @@ namespace World
         [SerializeField] private ResourceItem itemPrefab;
 
         private int animLTID = -1;
-        private Action<ResourceItem, Vector3> _dropItemAction;
+        private Action<ItemType, Vector3> _dropItemAction;
 
-        public void Init(Action<ResourceItem, Vector3> dropItemAction)
+        public void Init(Action<ItemType, Vector3> dropItemAction)
         {
             _dropItemAction = dropItemAction;
         }
@@ -27,7 +27,7 @@ namespace World
                 LeanTween.scaleY(gameObject, 1f, 0.2f).id;
             }).id;
 
-            _dropItemAction?.Invoke(itemPrefab, transform.position + new Vector3(0, 3 ,-2));
+            _dropItemAction?.Invoke(itemPrefab.ItemType, transform.position + new Vector3(0, 3 ,-2));
         }
     }
 }
