@@ -27,20 +27,16 @@ namespace World
 
         private int animLTID = -1;
         
-        private void AnimateMine()
+        public void TakeHit()
         {
+            if (animLTID != -1) LeanTween.cancel(animLTID);
+            
             animLTID =
             LeanTween.scaleY(gameObject, 0.85f, 0.1f).setOnComplete(() =>
             {
                 animLTID =
-                LeanTween.scaleY(gameObject, 1f, 0.4f).id;
+                LeanTween.scaleY(gameObject, 1f, 0.2f).id;
             }).id;
-        }
-
-        private void StopAnim()
-        {
-            transform.localScale = Vector3.one;
-            LeanTween.cancel(animLTID);
         }
 
         #endregion

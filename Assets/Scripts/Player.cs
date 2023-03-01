@@ -92,7 +92,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled
             LeanTween.scaleY(gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
             {
                 _animLTID =
-                    LeanTween.scaleY(gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).id;
+                    LeanTween.scaleY(gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
             }).id;
     }
 
