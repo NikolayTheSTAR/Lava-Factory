@@ -5,19 +5,9 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
 
-public class CharacterController : MonoBehaviour
+public class Player : MonoBehaviour, ICameraFocusable
 {
     [SerializeField] private NavMeshAgent meshAgent;
-    
-    /*
-    private void Update()
-    {
-        float x = Input.GetAxis("Horizontal");
-        float y = Input.GetAxis("Vertical");
-
-        SetDestination(new Vector2(x, y));
-    }
-    */
 
     public void SetDestination(Vector2 direction)
     {
