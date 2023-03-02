@@ -11,6 +11,7 @@ namespace World
 
     public enum ItemType
     {
-        Apple
+        Apple,
+        Crystal
     }
 }

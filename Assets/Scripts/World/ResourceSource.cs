@@ -6,12 +6,14 @@ namespace World
 {
     public class ResourceSource : MonoBehaviour
     {
-        [SerializeField] private ResourceItem itemPrefab;
+        [SerializeField] private SourceType sourceType;
 
         private int animLTID = -1;
-        private Action<ItemType, Vector3> _dropItemAction;
+        private Action<ResourceSource> _dropItemAction;
 
-        public void Init(Action<ItemType, Vector3> dropItemAction)
+        public SourceType SourceType => sourceType;
+
+        public void Init(Action<ResourceSource> dropItemAction)
         {
             _dropItemAction = dropItemAction;
         }
@@ -31,7 +33,12 @@ namespace World
                 LeanTween.scaleY(gameObject, 1f, 0.2f).id;
             }).id;
 
-            _dropItemAction?.Invoke(itemPrefab.ItemType, transform.position + new Vector3(0, 3 ,-2));
+            _dropItemAction?.Invoke(this);
         }
+    }
+
+    public enum SourceType
+    {
+        AppleTree
     }
 }

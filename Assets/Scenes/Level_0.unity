@@ -1407,7 +1407,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
 --- !u!114 &179512225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5278,7 +5278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2e1cfc5a1f9d469bb746453c4c462ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: -7297246828576578938, guid: cab6564a998dc4018a587aad585929b0, type: 3}
+  sourceType: 0
 --- !u!4 &997832585
 Transform:
   m_ObjectHideFlags: 0
@@ -11611,9 +11611,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47b7bf26d78d246f29fb0c8e6ed10968, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testItemPrefab: {fileID: -7297246828576578938, guid: cab6564a998dc4018a587aad585929b0, type: 3}
-  DropWaitTime: 0.2
-  FlyToReceiverTime: 0.5
 --- !u!1 &1943110950
 GameObject:
   m_ObjectHideFlags: 0

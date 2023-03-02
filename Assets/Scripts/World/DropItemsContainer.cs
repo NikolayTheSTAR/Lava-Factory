@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Configs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,20 +9,45 @@ namespace World
     public class DropItemsContainer : MonoBehaviour
     {
         private IDropReceiver _playerDropReceiver;
+        
+        private readonly float DropWaitTime = 0.2f;
+        private readonly float FlyToReceiverTime = 0.5f;
 
-        [SerializeField] private ResourceItem testItemPrefab;
-        [SerializeField] private float DropWaitTime = 0.2f;
-        [SerializeField] private float FlyToReceiverTime = 0.5f;
+        private Dictionary<ItemType, List<ResourceItem>> _itemPools;
+        private Dictionary<ItemType, ResourceItem> _loadedItemPrefabs;
 
-        private Dictionary<ItemType, List<ResourceItem>> itemPools;
+        private const string SourcesLoadPath = "Configs/SourcesConfig";
 
+        private SourcesConfig sourceConfig;
+
+        public SourcesConfig SourcesConfig
+        {
+            get
+            {
+                if (sourceConfig == null) sourceConfig = Resources.Load<SourcesConfig>(SourcesLoadPath);
+
+                return sourceConfig;
+            }
+        }
+
+        private string ItemLoadPath(ItemType itemType) => $"Items/{itemType.ToString()}";
+        
         public void Init(IDropReceiver playerDropReceiver)
         {
             _playerDropReceiver = playerDropReceiver;
-            itemPools = new Dictionary<ItemType, List<ResourceItem>>();
+            _itemPools = new Dictionary<ItemType, List<ResourceItem>>();
+            _loadedItemPrefabs = new Dictionary<ItemType, ResourceItem>();
+        }
+
+        public void DropItemFromSource(ResourceSource source)
+        {
+            var dropItemType = SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
+            var offset = new Vector3(0, 3, -2);
+            
+            DropItemToPlayer(dropItemType, source.transform.position + offset);
         }
         
-        public void DropItemToPlayer(ItemType itemType, Vector3 startPos)
+        private void DropItemToPlayer(ItemType itemType, Vector3 startPos)
         {
             var item = GetItemFromPool(itemType, startPos);
             item.transform.localScale = Vector3.zero;
@@ -48,9 +74,9 @@ namespace World
 
         private ResourceItem GetItemFromPool(ItemType itemType, Vector3 startPos, bool autoActivate = true)
         {
-            if (itemPools.ContainsKey(itemType))
+            if (_itemPools.ContainsKey(itemType))
             {
-                var pool = itemPools[itemType];
+                var pool = _itemPools[itemType];
                 var itemInPool = pool?.Find(info => !info.gameObject.activeSelf);
                 if (itemInPool != null)
                 {
@@ -66,11 +92,20 @@ namespace World
             else
             {
                 var newItem = CreateItem();
-                itemPools.Add(itemType, new List<ResourceItem>(){newItem});
+                _itemPools.Add(itemType, new List<ResourceItem>(){newItem});
                 return newItem;
             }
 
-            ResourceItem CreateItem() => Instantiate(testItemPrefab, startPos, quaternion.identity, transform);
+            ResourceItem CreateItem() => Instantiate(GetResourceItemPrefab(itemType), startPos, quaternion.identity, transform);
+        }
+
+        private ResourceItem GetResourceItemPrefab(ItemType itemType)
+        {
+            if (_loadedItemPrefabs.ContainsKey(itemType)) return _loadedItemPrefabs[itemType];
+            
+            var loadedItem = Resources.Load<ResourceItem>(ItemLoadPath(itemType));
+            _loadedItemPrefabs.Add(itemType, loadedItem);
+            return loadedItem;
         }
     }
 

@@ -20,7 +20,7 @@ namespace World
             
             dropItemsContainer.Init(CurrentPlayer);
             
-            foreach (var source in sources) source.Init(dropItemsContainer.DropItemToPlayer);
+            foreach (var source in sources) source.Init(dropItemsContainer.DropItemFromSource);
         }
     
         private void SpawnPlayer()
