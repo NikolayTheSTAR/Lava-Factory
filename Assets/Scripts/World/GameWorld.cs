@@ -21,7 +21,7 @@ namespace World
             if (CurrentPlayer != null) Destroy(CurrentPlayer);
             SpawnPlayer();
             
-            foreach (var source in sources) source.Init(dropItemsContainer.DropItemFromSource);
+            foreach (var source in sources) source.Init(dropItemsContainer.DropFromSource);
         }
     
         private void SpawnPlayer()

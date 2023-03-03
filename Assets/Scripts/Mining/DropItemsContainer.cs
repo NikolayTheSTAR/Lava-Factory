@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using World;
+using Random = UnityEngine.Random;
 
 namespace Mining
-{
+{ 
     public class DropItemsContainer : MonoBehaviour
     {
         private IDropReceiver _playerDropReceiver;
@@ -22,13 +23,25 @@ namespace Mining
             _itemPools = new Dictionary<ItemType, List<ResourceItem>>();
             _miningController = miningController;
         }
+        
+        private Vector3 _standardDropOffset = new Vector3(0, 3, -2);
+        private float _randomOffsetRange = 0.4f;
 
-        public void DropItemFromSource(ResourceSource source)
+        public void DropFromSource(ResourceSource source)
         {
-            var dropItemType = _miningController.SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
-            var offset = new Vector3(0, 3, -2);
+            var miningData =_miningController.SourcesConfig.SourceDatas[(int)source.SourceType].MiningData;
+
+            for (var i = 0; i < miningData.OneHitDropCount; i++)
+            {
+                var dropItemType = _miningController.SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
+                var offset = _standardDropOffset +
+                             new Vector3(
+                                 Random.Range(-_randomOffsetRange, _randomOffsetRange), 
+                                 Random.Range(-_randomOffsetRange, _randomOffsetRange),
+                                 Random.Range(-_randomOffsetRange, _randomOffsetRange));
             
-            DropItemToPlayer(dropItemType, source.transform.position + offset);
+                DropItemToPlayer(dropItemType, source.transform.position + offset);
+            }
         }
         
         private void DropItemToPlayer(ItemType itemType, Vector3 startPos)
