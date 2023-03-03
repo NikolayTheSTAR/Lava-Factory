@@ -1,9 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TheSTAR.Data;
 using UnityEngine;
 using World;
+using TheSTAR.Utility;
 
 public class TransactionsController : MonoBehaviour
 {
@@ -28,7 +27,11 @@ public class TransactionsController : MonoBehaviour
 
     private void InitReaction()
     {
-        foreach (var tr in _transactionReactables) tr.OnTransactionReact(ItemType.Apple, _data.gameData.applesCount);
+        var itemTypes = EnumUtility.GetValues<ItemType>();
+        
+        foreach (var tr in _transactionReactables)
+            foreach (var itemType in itemTypes)
+                tr.OnTransactionReact(itemType, _data.gameData.GetItemCount(itemType));
     }
 
     private void Reaction(ItemType itemType, int finalValue)

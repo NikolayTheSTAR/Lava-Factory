@@ -13,6 +13,8 @@ namespace TheSTAR.GUI
 
         private int _animLTID = 0;
         private int _currentValue = 0;
+        
+        public ItemType ItemType => itemType;
 
         public void SetValue(int value)
         {

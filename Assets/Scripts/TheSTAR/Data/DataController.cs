@@ -78,15 +78,44 @@ namespace TheSTAR.Data
         [Serializable]
         public class GameData
         {
-            public int applesCount = 0;
-            //public Dictionary<ItemType, int> itemCounts = new Dictionary<ItemType, int>();
+            public List<ItemCountData> itemCounts = new List<ItemCountData>();
 
             public void AddItems(ItemType itemType, int count, out int result)
             {
-                applesCount += count;
-                result = applesCount;
-                //if (!itemCounts.ContainsKey(itemType)) itemCounts.Add(itemType, count);
-                //else itemCounts[itemType] += count;
+                var itemCountData = itemCounts.Find(info => info.ItemType == itemType);
+                if (itemCountData == null)
+                {
+                    itemCountData = new ItemCountData(itemType, count);
+                    itemCounts.Add(itemCountData);
+                }
+                else itemCountData.Count += count;
+                
+                result = itemCountData.Count;
+            }
+
+            public int GetItemCount(ItemType itemType)
+            {
+                var itemCountData = itemCounts.Find(info => info.ItemType == itemType);
+                if (itemCountData == null)
+                {
+                    itemCountData = new ItemCountData(itemType, 0);
+                    itemCounts.Add(itemCountData);
+                }
+
+                return itemCountData.Count;
+            }
+        }
+
+        [Serializable]
+        public class ItemCountData
+        {
+            public ItemType ItemType;
+            public int Count;
+
+            public ItemCountData(ItemType itemType, int count)
+            {
+                ItemType = itemType;
+                Count = count;
             }
         }
     }
