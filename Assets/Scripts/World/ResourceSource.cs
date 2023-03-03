@@ -38,12 +38,8 @@ namespace World
             if (_health <= 0) return;
 
             _health--;
-            
-            if (_animLTID != -1)
-            {
-                LeanTween.cancel(_animLTID);
-                transform.localScale = Vector3.one;
-            }
+
+            BreakAnim();
             
             _animLTID =
             LeanTween.scaleY(gameObject, 0.85f, 0.1f).setOnComplete(() =>
@@ -56,6 +52,14 @@ namespace World
             
             // emptying
             if (_health <= 0) Empty();
+        }
+
+        private void BreakAnim()
+        {
+            if (_animLTID == -1) return;
+            
+            LeanTween.cancel(_animLTID);
+            transform.localScale = Vector3.one;
         }
 
         private void Empty()
@@ -73,6 +77,16 @@ namespace World
             IsEmpty = false;
             _health = _miningData.MaxHitsCount;
             _onRecovery?.Invoke();
+            
+            // anim
+            
+            BreakAnim();
+            _animLTID =
+                LeanTween.scaleY(gameObject, 1.1f, 0.1f).setOnComplete(() =>
+                {
+                    _animLTID =
+                        LeanTween.scaleY(gameObject, 1f, 0.2f).id;
+                }).id;
         }
     }
 

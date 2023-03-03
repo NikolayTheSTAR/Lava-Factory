@@ -51,9 +51,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         if (!other.CompareTag("Source")) return;
         var r = other.GetComponent<ResourceSource>();
-        if (r == null || r.IsEmpty) return;
         
+        if (r == null) return;
         _currentSource = r;
+        
+        if (r.IsEmpty) return;
+        
         StartMining(r);
     }
     

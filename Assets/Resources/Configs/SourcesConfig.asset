@@ -20,6 +20,6 @@ MonoBehaviour:
       _oneHitDropCount: 2
       _maxHitsCount: 3
       _recoveryTime:
-        seconds: 10
+        seconds: 5
         minutes: 0
         hours: 0
