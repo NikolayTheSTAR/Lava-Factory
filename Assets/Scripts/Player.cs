@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Configs;
+using Mining;
 using TheSTAR.Input;
 using UnityEngine;
 using UnityEngine.AI;
@@ -21,9 +23,14 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     private Coroutine _mineCoroutine;
     private int _animLTID = -1;
 
-    public void Init()
+    public delegate void OnStartMiningDelegate(SourceType sourceType, out SourceMiningData miningData);
+
+    private OnStartMiningDelegate _onStartMining;
+
+    public void Init(OnStartMiningDelegate onStartMining)
     {
         trigger.Init(OnEnter, OnExit);
+        _onStartMining = onStartMining;
     }
     
     public void JoystickInput(Vector2 input)
@@ -60,6 +67,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     private void StartMining(ResourceSource source)
     {
+        _onStartMining(source.SourceType, out var miningData);
+        mineStrikePeriod = miningData.MiningPeriod;
+        
         _isMining = true;
         _currentSource = source;
         _mineCoroutine = StartCoroutine(MiningCor());

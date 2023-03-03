@@ -18,9 +18,15 @@ namespace Configs
     {
         [SerializeField] private SourceType _sourceType;
         [SerializeField] private ItemType _dropItemType;
-        
-        [Header("Mining")]
-        
+        [SerializeField] private SourceMiningData _miningData;
+
+        public ItemType DropItemType => _dropItemType;
+        public SourceMiningData MiningData => _miningData;
+    }
+    
+    [Serializable]
+    public class SourceMiningData
+    {
         [Range(0.01f, 3)]
         [LabelText("Mining Period (s)")]
         [SerializeField] private float _miningPeriod = 1;
@@ -32,7 +38,10 @@ namespace Configs
         [SerializeField] private int _maxHitsCount;
         [SerializeField] private TimeData _recoveryTime;
 
-        public ItemType DropItemType => _dropItemType;
+        public float MiningPeriod => _miningPeriod;
+        public int OneHitDropCount => _oneHitDropCount;
+        public int MaxHitsCount => _maxHitsCount;
+        public TimeData RecoveryTime => _recoveryTime;
     }
 
     [Serializable]

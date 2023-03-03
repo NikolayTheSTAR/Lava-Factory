@@ -1,47 +1,31 @@
 using System;
 using System.Collections.Generic;
-using Configs;
 using Unity.Mathematics;
 using UnityEngine;
+using World;
 
-namespace World
+namespace Mining
 {
     public class DropItemsContainer : MonoBehaviour
     {
         private IDropReceiver _playerDropReceiver;
-        
-        private readonly float DropWaitTime = 0.2f;
-        private readonly float FlyToReceiverTime = 0.5f;
+        private MiningController _miningController;
+
+        private const float DropWaitTime = 0.2f;
+        private const float FlyToReceiverTime = 0.5f;
 
         private Dictionary<ItemType, List<ResourceItem>> _itemPools;
-        private Dictionary<ItemType, ResourceItem> _loadedItemPrefabs;
 
-        private const string SourcesLoadPath = "Configs/SourcesConfig";
-
-        private SourcesConfig sourceConfig;
-
-        public SourcesConfig SourcesConfig
-        {
-            get
-            {
-                if (sourceConfig == null) sourceConfig = Resources.Load<SourcesConfig>(SourcesLoadPath);
-
-                return sourceConfig;
-            }
-        }
-
-        private string ItemLoadPath(ItemType itemType) => $"Items/{itemType.ToString()}";
-        
-        public void Init(IDropReceiver playerDropReceiver)
+        public void Init(MiningController miningController, IDropReceiver playerDropReceiver)
         {
             _playerDropReceiver = playerDropReceiver;
             _itemPools = new Dictionary<ItemType, List<ResourceItem>>();
-            _loadedItemPrefabs = new Dictionary<ItemType, ResourceItem>();
+            _miningController = miningController;
         }
 
         public void DropItemFromSource(ResourceSource source)
         {
-            var dropItemType = SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
+            var dropItemType = _miningController.SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
             var offset = new Vector3(0, 3, -2);
             
             DropItemToPlayer(dropItemType, source.transform.position + offset);
@@ -96,16 +80,7 @@ namespace World
                 return newItem;
             }
 
-            ResourceItem CreateItem() => Instantiate(GetResourceItemPrefab(itemType), startPos, quaternion.identity, transform);
-        }
-
-        private ResourceItem GetResourceItemPrefab(ItemType itemType)
-        {
-            if (_loadedItemPrefabs.ContainsKey(itemType)) return _loadedItemPrefabs[itemType];
-            
-            var loadedItem = Resources.Load<ResourceItem>(ItemLoadPath(itemType));
-            _loadedItemPrefabs.Add(itemType, loadedItem);
-            return loadedItem;
+            ResourceItem CreateItem() => Instantiate(_miningController.GetResourceItemPrefab(itemType), startPos, quaternion.identity, transform);
         }
     }
 

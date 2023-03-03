@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sourceDatas:
   - _sourceType: 0
-    _itemType: 0
-    _miningPeriod: 1
-    _oneHitDropCount: 1
-    _maxHitsCount: 10
-    _recoveryTime:
-      seconds: 10
-      minutes: 0
-      hours: 0
+    _dropItemType: 0
+    _miningData:
+      _miningPeriod: 0.3
+      _oneHitDropCount: 1
+      _maxHitsCount: 1
+      _recoveryTime:
+        seconds: 20
+        minutes: 0
+        hours: 0
