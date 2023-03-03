@@ -59,7 +59,8 @@ namespace Mining
                     item.transform.position = startPos + value * (difference);
                     
                     // physic imitation
-                    var dopValueY = Math.Abs((value * value - value) * 2 * difference.x);
+                    var impulseForce = _miningController.ItemsConfig.Items[(int)itemType].PhysicalImpulse;
+                    var dopValueY = Math.Abs((value * value - value) * impulseForce * difference.x);
                     item.transform.position += new Vector3(0, dopValueY, 0);
 
                 }) .setOnComplete(() =>

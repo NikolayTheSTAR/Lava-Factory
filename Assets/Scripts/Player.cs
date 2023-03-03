@@ -51,7 +51,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         if (!other.CompareTag("Source")) return;
         var r = other.GetComponent<ResourceSource>();
-        if (r == null) return;
+        if (r == null || r.IsEmpty) return;
+        
+        _currentSource = r;
         StartMining(r);
     }
     
@@ -60,10 +62,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         if (!other.CompareTag("Source")) return;
         var r = other.GetComponent<ResourceSource>();
         if (r == null) return;
+
+        if (_currentSource == r) _currentSource = null;
         StopMining();
     }
 
-    #region Minig
+    #region Mining
 
     private void StartMining(ResourceSource source)
     {
@@ -71,11 +75,11 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         mineStrikePeriod = miningData.MiningPeriod;
         
         _isMining = true;
-        _currentSource = source;
+        
         _mineCoroutine = StartCoroutine(MiningCor());
     }
         
-    private void StopMining()
+    public void StopMining()
     {
         _isMining = false;
         LeanTween.cancel(_animLTID);
@@ -109,5 +113,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             }).id;
     }
 
+    public void RetryMining()
+    {
+        if (_isMining || _currentSource == null || _currentSource.IsEmpty) return;
+
+        StartMining(_currentSource);
+    }
+    
     #endregion
 }

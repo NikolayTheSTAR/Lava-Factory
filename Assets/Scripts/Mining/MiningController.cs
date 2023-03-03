@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Configs;
 using UnityEngine;
@@ -15,13 +16,27 @@ namespace Mining
             get
             {
                 if (_sourceConfig == null) _sourceConfig = Resources.Load<SourcesConfig>(SourcesLoadPath);
-
                 return _sourceConfig;
+            }
+        }
+
+        private const string ItemsConfigLoadPath = "Configs/ItemsConfig";
+        private ItemsConfig _itemsConfig;
+        public ItemsConfig ItemsConfig
+        {
+            get
+            {
+                if (_itemsConfig == null) _itemsConfig = Resources.Load<ItemsConfig>(ItemsConfigLoadPath);
+                return _itemsConfig;
             }
         }
         
         private Dictionary<ItemType, ResourceItem> _loadedItemPrefabs;
-        
+        private List<RecoveryData> _recoveryDatas = new List<RecoveryData>();
+        private bool _isWaitForRecovery = false;
+        private float _tik;
+        private const float NeededTikValue = 1;
+
         private string ItemLoadPath(ItemType itemType) => $"Items/{itemType.ToString()}";
 
         public void Init()
@@ -41,6 +56,56 @@ namespace Mining
         public void OnStartMining(SourceType sourceType, out SourceMiningData miningData)
         {
             miningData = SourcesConfig.SourceDatas[(int)sourceType].MiningData;
+        }
+
+        public void StartSourceRecovery(ResourceSource source)
+        {
+            var recoveryDateTime = 
+                DateTime.Now + 
+                new TimeSpan(
+                    source.MiningData.RecoveryTime.Hours, 
+                    source.MiningData.RecoveryTime.Minutes,
+                    source.MiningData.RecoveryTime.Seconds);
+            
+            var recoveryData = new RecoveryData(source, recoveryDateTime);
+            
+            _recoveryDatas.Add(recoveryData);
+            _isWaitForRecovery = true;
+        }
+
+        private void Update()
+        {
+            if (!_isWaitForRecovery) return;
+            
+            _tik += Time.deltaTime;
+            if (!(_tik > NeededTikValue)) return;
+            _tik = 0;
+            
+            CheckRecovery();
+        }
+
+        private void CheckRecovery()
+        {
+            var testRecoveryData = _recoveryDatas[0];
+
+            if (DateTime.Now < testRecoveryData.recoveryTime) return;
+            
+            testRecoveryData.source.Recovery();
+            _recoveryDatas.Remove(testRecoveryData);
+            _isWaitForRecovery = false;
+        }
+
+        [Serializable]
+        private class RecoveryData
+        {
+            public ResourceSource source { get; private set; }
+            public DateTime recoveryTime { get; private set; }
+
+            public RecoveryData(ResourceSource source, DateTime time)
+            {
+                this.source = source;
+                this.recoveryTime = time;
+            }
         }
     }
 }

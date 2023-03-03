@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fa647862f30c4df8a805443354b3948, type: 3}
   m_Name: ItemsConfig
   m_EditorClassIdentifier: 
-  items: []
+  items:
+  - itemType: 0
+    physicalImpulse: 3

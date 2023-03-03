@@ -55,5 +55,9 @@ namespace Configs
         
         [Range(0, 23)]
         [SerializeField] private int hours;
+        
+        public int Seconds => seconds;
+        public int Minutes => minutes;
+        public int Hours => hours;
     }
 }

@@ -8,11 +8,16 @@ namespace Configs
     public class ItemsConfig : ScriptableObject
     {
         [SerializeField] private ItemData[] items = new ItemData[0];
+        public ItemData[] Items => items;
     }
 
     [Serializable]
     public class ItemData
     {
-        [SerializeField] private ItemType _itemType;
+        [SerializeField] private ItemType itemType;
+        [Range(0, 5)]
+        [SerializeField] private float physicalImpulse = 2;
+
+        public float PhysicalImpulse => physicalImpulse;
     }
 }

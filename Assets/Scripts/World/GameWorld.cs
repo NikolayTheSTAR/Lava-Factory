@@ -20,8 +20,17 @@ namespace World
             
             if (CurrentPlayer != null) Destroy(CurrentPlayer);
             SpawnPlayer();
-            
-            foreach (var source in sources) source.Init(dropItemsContainer.DropFromSource);
+
+            foreach (var source in sources)
+            {
+                var sourceType = source.SourceType;
+                var miningData = _miningController.SourcesConfig.SourceDatas[(int)sourceType].MiningData;
+                source.Init(miningData, dropItemsContainer.DropFromSource, (s) =>
+                {
+                    CurrentPlayer.StopMining();
+                    _miningController.StartSourceRecovery(s);
+                }, CurrentPlayer.RetryMining);
+            }
         }
     
         private void SpawnPlayer()
