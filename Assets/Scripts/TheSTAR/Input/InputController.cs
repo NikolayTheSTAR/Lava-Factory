@@ -5,9 +5,7 @@ namespace TheSTAR.Input
 {
     public class InputController : MonoBehaviour
     {
-        [SerializeField] private JoystickContainer joystickContainer;
-
-        public void Init(IJoystickControlled j)
+        public void Init(JoystickContainer joystickContainer, IJoystickControlled j)
         {
             joystickContainer.Init(j != null ? j.JoystickInput : null);
         }

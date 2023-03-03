@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TheSTAR.Data;
 using Unity.Mathematics;
 using UnityEngine;
 using World;
@@ -11,14 +12,16 @@ namespace Mining
     {
         private IDropReceiver _playerDropReceiver;
         private MiningController _miningController;
+        private TransactionsController _transactions;
 
         private const float DropWaitTime = 0.2f;
         private const float FlyToReceiverTime = 0.5f;
 
         private Dictionary<ItemType, List<ResourceItem>> _itemPools;
 
-        public void Init(MiningController miningController, IDropReceiver playerDropReceiver)
+        public void Init(TransactionsController transactions, MiningController miningController, IDropReceiver playerDropReceiver)
         {
+            _transactions = transactions;
             _playerDropReceiver = playerDropReceiver;
             _itemPools = new Dictionary<ItemType, List<ResourceItem>>();
             _miningController = miningController;
@@ -66,6 +69,7 @@ namespace Mining
                 }) .setOnComplete(() =>
                 {
                     item.gameObject.SetActive(false);
+                    _transactions.AddItem(itemType);
                 });
             }
         }
