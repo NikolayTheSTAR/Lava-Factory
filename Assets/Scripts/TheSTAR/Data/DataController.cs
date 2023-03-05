@@ -96,11 +96,9 @@ namespace TheSTAR.Data
             public int GetItemCount(ItemType itemType)
             {
                 var itemCountData = itemCounts.Find(info => info.ItemType == itemType);
-                if (itemCountData == null)
-                {
-                    itemCountData = new ItemCountData(itemType, 0);
-                    itemCounts.Add(itemCountData);
-                }
+                if (itemCountData != null) return itemCountData.Count;
+                itemCountData = new ItemCountData(itemType, 0);
+                itemCounts.Add(itemCountData);
 
                 return itemCountData.Count;
             }

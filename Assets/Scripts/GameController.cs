@@ -35,6 +35,6 @@ public class GameController : MonoBehaviour
         gui.Init(out var trs);
         input.Init(gui.FindScreen<GameScreen>().JoystickContainer, world.CurrentPlayer);
         transactions.Init(trs, data);
-        drop.Init(transactions, mining, world.CurrentPlayer);
+        drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopTransaction);
     }
 }

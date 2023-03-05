@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Configs;
 using TheSTAR.Data;
@@ -37,12 +38,23 @@ public class TransactionsController : MonoBehaviour
         Reaction(itemType, result);
     }
     
-    public void ReduceItem(ItemType itemType, int count = 1, bool autoSave = false)
+    public void ReduceItem(ItemType itemType, int count = 1, bool autoSave = false, Action completeAction = null, Action failAction = null)
     {
-        _data.gameData.AddItems(itemType, -count, out int result);
-        if (autoSave) _data.Save();
+        if (_data.gameData.GetItemCount(itemType) >= count)
+        {
+            _data.gameData.AddItems(itemType, -count, out int result);
+            if (autoSave) _data.Save();
         
-        Reaction(itemType, result);
+            Reaction(itemType, result);
+            
+            completeAction?.Invoke();
+        }
+        else failAction?.Invoke();
+    }
+
+    public int GetItemsCount(ItemType itemType)
+    {
+        return _data.gameData.GetItemCount(itemType);
     }
 
     private void InitReaction()

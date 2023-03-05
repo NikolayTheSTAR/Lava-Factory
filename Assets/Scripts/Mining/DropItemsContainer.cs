@@ -21,14 +21,16 @@ namespace Mining
         private readonly Vector3 _standardDropOffset = new Vector3(0, 3, -2);
         
         private float _randomOffsetRange = 0.4f;
-        
-        private Vector3 CreateItemPosOffset => _standardDropOffset +
-            new Vector3(
-                Random.Range(-_randomOffsetRange, _randomOffsetRange), 
-                Random.Range(-_randomOffsetRange, _randomOffsetRange),
-                Random.Range(-_randomOffsetRange, _randomOffsetRange));
 
-        public void Init(TransactionsController transactions, MiningController miningController, IDropReceiver playerDropReceiver)
+        private Action _onFailDropToFactoryAction;
+
+        private Vector3 CreateItemPosOffset => _standardDropOffset +
+                                               new Vector3(
+                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange), 
+                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange),
+                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange));
+
+        public void Init(TransactionsController transactions, MiningController miningController, IDropReceiver playerDropReceiver, Action onFailDropToFactoryAction)
         {
             _transactions = transactions;
             _playerDropReceiver = playerDropReceiver;
@@ -37,6 +39,7 @@ namespace Mining
 
             _randomOffsetRange = transactions.FactoriesConfig.RandomOffsetRange;
             _dropWaitAfterCreateTime = transactions.FactoriesConfig.DropWaitAfterCreateTime;
+            _onFailDropToFactoryAction = onFailDropToFactoryAction;
         }
         
         public void DropFromSource(ResourceSource source)
@@ -85,8 +88,9 @@ namespace Mining
             var fromItemType = factoryData.FromItemType;
             var toItemType = factoryData.ToItemType;
             
-            _transactions.ReduceItem(fromItemType);
-            DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory, null);
+            _transactions.ReduceItem(fromItemType, 1, false, 
+                () => DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory, null), 
+                () => _onFailDropToFactoryAction());
         }
         
         private ResourceItem GetItemFromPool(ItemType itemType, Vector3 startPos, bool autoActivate = true)
