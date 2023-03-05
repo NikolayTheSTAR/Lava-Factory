@@ -19,6 +19,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     private bool _isMining = false;
 
+    private ICollisionInteractable _currentCollisionInteractable;
     private ResourceSource _currentSource;
     private Coroutine _mineCoroutine;
     private int _animLTID = -1;
@@ -49,31 +50,29 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     private void OnEnter(Collider other)
     {
-        if (!other.CompareTag("Source")) return;
-        var r = other.GetComponent<ResourceSource>();
+        var ci = other.GetComponent<ICollisionInteractable>();
+        if (ci == null) return;
         
-        if (r == null) return;
-        _currentSource = r;
+        _currentCollisionInteractable = ci;
         
-        if (r.IsEmpty) return;
+        if (!ci.CanInteract) return;
         
-        StartMining(r);
+        ci.Interact(this);
     }
     
     private void OnExit(Collider other)
     {
-        if (!other.CompareTag("Source")) return;
-        var r = other.GetComponent<ResourceSource>();
-        if (r == null) return;
-
-        if (_currentSource == r) _currentSource = null;
-        StopMining();
+        var ci = other.GetComponent<ICollisionInteractable>();
+        if (ci == null) return;
+        if (_currentCollisionInteractable == ci) _currentCollisionInteractable = null;
+        ci.StopInteract(this);
     }
 
     #region Mining
 
-    private void StartMining(ResourceSource source)
+    public void StartMining(ResourceSource source)
     {
+        _currentSource = source;
         _onStartMining(source.SourceType, out var miningData);
         mineStrikePeriod = miningData.MiningPeriod;
         
@@ -86,10 +85,13 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         _isMining = false;
         LeanTween.cancel(_animLTID);
-        StopCoroutine(_mineCoroutine);
+        
+        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
 
         _animLTID =
             LeanTween.scaleY(gameObject, 1, DefaultMineStrikeTime).id;
+
+        _currentSource = null;
     }
 
     private IEnumerator MiningCor()
@@ -116,11 +118,11 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             }).id;
     }
 
-    public void RetryMining()
+    public void RetryInteract()
     {
-        if (_isMining || _currentSource == null || _currentSource.IsEmpty) return;
+        if (_isMining || _currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
 
-        StartMining(_currentSource);
+        _currentCollisionInteractable.Interact(this);
     }
     
     #endregion

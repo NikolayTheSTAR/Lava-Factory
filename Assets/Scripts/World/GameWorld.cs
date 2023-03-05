@@ -29,7 +29,7 @@ namespace World
                 {
                     CurrentPlayer.StopMining();
                     _miningController.StartSourceRecovery(s);
-                }, CurrentPlayer.RetryMining);
+                }, CurrentPlayer.RetryInteract);
             }
         }
     

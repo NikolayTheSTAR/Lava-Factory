@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace World
 {
-    public class ResourceSource : MonoBehaviour
+    public class ResourceSource : MonoBehaviour, ICollisionInteractable
     {
         [SerializeField] private SourceType sourceType;
         [SerializeField] private GameObject prolificVisual;
@@ -17,7 +17,8 @@ namespace World
         private Action _onRecovery;
         private int _health = 1;
         private SourceMiningData _miningData;
-        
+
+        public bool CanInteract => !IsEmpty;
         public bool IsEmpty { get; private set; }
 
         public SourceType SourceType => sourceType;
@@ -87,6 +88,16 @@ namespace World
                     _animLTID =
                         LeanTween.scaleY(gameObject, 1f, 0.2f).id;
                 }).id;
+        }
+
+        public void Interact(Player p)
+        {
+            p.StartMining(this);
+        }
+
+        public void StopInteract(Player p)
+        {
+            p.StopMining();
         }
     }
 
