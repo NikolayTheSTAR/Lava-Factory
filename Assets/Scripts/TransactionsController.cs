@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Configs;
 using TheSTAR.Data;
 using UnityEngine;
 using World;
@@ -8,6 +9,17 @@ public class TransactionsController : MonoBehaviour
 {
     private List<ITransactionReactable> _transactionReactables;
     private DataController _data;
+
+    private const string FactoriesConfigPath = "Configs/FactoriesConfig";
+    private FactoriesConfig _factoriesConfig;
+    public FactoriesConfig FactoriesConfig
+    {
+        get
+        {
+            if (_factoriesConfig == null) _factoriesConfig = Resources.Load<FactoriesConfig>(FactoriesConfigPath);
+            return _factoriesConfig;
+        }
+    }
     
     public void Init(List<ITransactionReactable> trs, DataController data)
     {
@@ -20,7 +32,15 @@ public class TransactionsController : MonoBehaviour
     public void AddItem(ItemType itemType, int count = 1, bool autoSave = true)
     {
         _data.gameData.AddItems(itemType, count, out int result);
-        _data.Save();
+        if (autoSave) _data.Save();
+        
+        Reaction(itemType, result);
+    }
+    
+    public void ReduceItem(ItemType itemType, int count = 1, bool autoSave = false)
+    {
+        _data.gameData.AddItems(itemType, -count, out int result);
+        if (autoSave) _data.Save();
         
         Reaction(itemType, result);
     }

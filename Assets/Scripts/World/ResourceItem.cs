@@ -12,6 +12,10 @@ namespace World
     public enum ItemType
     {
         Apple,
-        Crystal
+        Log,
+        Wheat,
+        AppleJam,
+        Board,
+        Flour
     }
 }

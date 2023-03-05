@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
     private void Init()
     {
         mining.Init();
-        world.Init(drop, mining);
+        world.Init(drop, mining, transactions);
         cameraController.FocusTo(world.CurrentPlayer);
         gui.Init(out var trs);
         input.Init(gui.FindScreen<GameScreen>().JoystickContainer, world.CurrentPlayer);

@@ -13,26 +13,33 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
-    [SerializeField] private float mineStrikePeriod = 1;
+    
+    private float _mineStrikePeriod = 1;
+    private float _dropToFactoryPeriod = 1;
 
     private const float DefaultMineStrikeTime = 0.5f;
 
     private bool _isMoving = false;
     private bool _isMining = false;
+    private bool _isTransaction = false;
     
     private ICollisionInteractable _currentCollisionInteractable;
     private ResourceSource _currentSource;
+    private Factory _currentFactory;
     private Coroutine _mineCoroutine;
+    private Coroutine _transactionCoroutine;
     private int _animLTID = -1;
 
     public delegate void OnStartMiningDelegate(SourceType sourceType, out SourceMiningData miningData);
-
     private OnStartMiningDelegate _onStartMining;
+    private Action<Factory> _dropToFactoryAction;
 
-    public void Init(OnStartMiningDelegate onStartMining)
+    public void Init(OnStartMiningDelegate onStartMining, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
         trigger.Init(OnEnter, OnExit);
         _onStartMining = onStartMining;
+        _dropToFactoryAction = dropToFactoryAction;
+        _dropToFactoryPeriod = dropToFactoryPeriod;
     }
 
     #region Logic Enter
@@ -98,7 +105,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         _currentSource = source;
         _onStartMining(source.SourceType, out var miningData);
-        mineStrikePeriod = miningData.MiningPeriod;
+        _mineStrikePeriod = miningData.MiningPeriod;
         
         _isMining = true;
         
@@ -123,7 +130,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         while (_isMining)
         {
             DoMineStrike();
-            yield return new WaitForSeconds(mineStrikePeriod);
+            yield return new WaitForSeconds(_mineStrikePeriod);
         }
         yield return null;
     }
@@ -132,7 +139,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         if (_animLTID != -1) LeanTween.cancel(_animLTID);
 
-        var animTimeMultiply = mineStrikePeriod > DefaultMineStrikeTime ? 1 : (mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
+        var animTimeMultiply = _mineStrikePeriod > DefaultMineStrikeTime ? 1 : (_mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
         
         _animLTID =
             LeanTween.scaleY(gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
@@ -149,5 +156,34 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         _currentCollisionInteractable.Interact(this);
     }
     
+    #endregion
+
+    #region Transactions
+
+    public void StartTransaction(Factory factory)
+    {
+        _isTransaction = true;
+        _currentFactory = factory;
+
+        _transactionCoroutine = StartCoroutine(TransactionsCor());
+    }
+    
+    public void StopTransaction()
+    {
+        _isTransaction = false;
+        if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
+        _currentFactory = null;
+    }
+    
+    private IEnumerator TransactionsCor()
+    {
+        while (_isTransaction)
+        {
+            _dropToFactoryAction(_currentFactory);
+            yield return new WaitForSeconds(_dropToFactoryPeriod);
+        }
+        yield return null;
+    }
+
     #endregion
 }

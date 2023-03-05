@@ -13,11 +13,20 @@ namespace Mining
         private IDropReceiver _playerDropReceiver;
         private MiningController _miningController;
         private TransactionsController _transactions;
-
-        private const float DropWaitTime = 0.2f;
-        private const float FlyToReceiverTime = 0.5f;
-
+        
         private Dictionary<ItemType, List<ResourceItem>> _itemPools;
+
+        private float _dropWaitAfterCreateTime = 0.2f;
+        private const float FlyToReceiverTime = 0.5f;
+        private readonly Vector3 _standardDropOffset = new Vector3(0, 3, -2);
+        
+        private float _randomOffsetRange = 0.4f;
+        
+        private Vector3 CreateItemPosOffset => _standardDropOffset +
+            new Vector3(
+                Random.Range(-_randomOffsetRange, _randomOffsetRange), 
+                Random.Range(-_randomOffsetRange, _randomOffsetRange),
+                Random.Range(-_randomOffsetRange, _randomOffsetRange));
 
         public void Init(TransactionsController transactions, MiningController miningController, IDropReceiver playerDropReceiver)
         {
@@ -25,11 +34,11 @@ namespace Mining
             _playerDropReceiver = playerDropReceiver;
             _itemPools = new Dictionary<ItemType, List<ResourceItem>>();
             _miningController = miningController;
+
+            _randomOffsetRange = transactions.FactoriesConfig.RandomOffsetRange;
+            _dropWaitAfterCreateTime = transactions.FactoriesConfig.DropWaitAfterCreateTime;
         }
         
-        private Vector3 _standardDropOffset = new Vector3(0, 3, -2);
-        private float _randomOffsetRange = 0.4f;
-
         public void DropFromSource(ResourceSource source)
         {
             var miningData =_miningController.SourcesConfig.SourceDatas[(int)source.SourceType].MiningData;
@@ -37,28 +46,24 @@ namespace Mining
             for (var i = 0; i < miningData.OneHitDropCount; i++)
             {
                 var dropItemType = _miningController.SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
-                var offset = _standardDropOffset +
-                             new Vector3(
-                                 Random.Range(-_randomOffsetRange, _randomOffsetRange), 
-                                 Random.Range(-_randomOffsetRange, _randomOffsetRange),
-                                 Random.Range(-_randomOffsetRange, _randomOffsetRange));
+                var offset = CreateItemPosOffset;
             
-                DropItemToPlayer(dropItemType, source.transform.position + offset);
+                DropItemTo(dropItemType, source.transform.position + offset, _playerDropReceiver, () => _transactions.AddItem(dropItemType));
             }
         }
         
-        private void DropItemToPlayer(ItemType itemType, Vector3 startPos)
+        private void DropItemTo(ItemType itemType, Vector3 startPos, IDropReceiver receiver, Action completeAction)
         {
             var item = GetItemFromPool(itemType, startPos);
             item.transform.localScale = Vector3.zero;
             
-            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => { LeanTween.value(0, 1, DropWaitTime).setOnComplete(FlyToPlayer);});
+            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => { LeanTween.value(0, 1, _dropWaitAfterCreateTime).setOnComplete(FlyToPlayer);});
 
             void FlyToPlayer()
             {
                 LeanTween.value(0, 1, FlyToReceiverTime).setOnUpdate((value) =>
                 {
-                    var difference = _playerDropReceiver.transform.position - startPos;
+                    var difference = receiver.transform.position - startPos;
                     item.transform.position = startPos + value * (difference);
                     
                     // physic imitation
@@ -69,11 +74,21 @@ namespace Mining
                 }) .setOnComplete(() =>
                 {
                     item.gameObject.SetActive(false);
-                    _transactions.AddItem(itemType);
+                    completeAction?.Invoke();
                 });
             }
         }
 
+        public void DropToFactory(Factory factory)
+        {
+            var factoryData = _transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
+            var fromItemType = factoryData.FromItemType;
+            var toItemType = factoryData.ToItemType;
+            
+            _transactions.ReduceItem(fromItemType);
+            DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory, null);
+        }
+        
         private ResourceItem GetItemFromPool(ItemType itemType, Vector3 startPos, bool autoActivate = true)
         {
             if (_itemPools.ContainsKey(itemType))
