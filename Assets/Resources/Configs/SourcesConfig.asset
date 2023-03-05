@@ -18,7 +18,7 @@ MonoBehaviour:
     _miningData:
       _miningPeriod: 1
       _oneHitDropCount: 2
-      _maxHitsCount: 10
+      _maxHitsCount: 5
       _recoveryTime:
         seconds: 10
         minutes: 0
