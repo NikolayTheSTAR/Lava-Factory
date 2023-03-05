@@ -17,8 +17,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     private const float DefaultMineStrikeTime = 0.5f;
 
+    private bool _isMoving = false;
     private bool _isMining = false;
-
+    
     private ICollisionInteractable _currentCollisionInteractable;
     private ResourceSource _currentSource;
     private Coroutine _mineCoroutine;
@@ -33,7 +34,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         trigger.Init(OnEnter, OnExit);
         _onStartMining = onStartMining;
     }
-    
+
+    #region Logic Enter
+
     public void JoystickInput(Vector2 input)
     {
         Vector3 finalMoveDirection;
@@ -42,8 +45,15 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         {
             var tempMoveDirection = new Vector3(input.x, 0, input.y);
             finalMoveDirection = transform.position + tempMoveDirection;
+            
+            if (!_isMoving) OnStartMove();
         }
-        else finalMoveDirection = transform.position;
+        else
+        {
+            finalMoveDirection = transform.position;
+            
+            if (_isMoving) OnStopMove();
+        }
 
         meshAgent.SetDestination(finalMoveDirection);
     }
@@ -52,12 +62,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
-        
         _currentCollisionInteractable = ci;
-        
         if (!ci.CanInteract) return;
-        
-        ci.Interact(this);
+        if (ci.Condition == ICICondition.None) ci.Interact(this);
     }
     
     private void OnExit(Collider other)
@@ -65,9 +72,26 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
         if (_currentCollisionInteractable == ci) _currentCollisionInteractable = null;
-        ci.StopInteract(this);
+        
+        if (ci.Condition == ICICondition.None) ci.StopInteract(this);
     }
 
+    private void OnStartMove()
+    {
+        _isMoving = true;
+        if (_currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
+        if (_currentCollisionInteractable.Condition == ICICondition.PlayerIsStopped) _currentCollisionInteractable.StopInteract(this);
+    }
+    
+    private void OnStopMove()
+    {
+        _isMoving = false;
+        if (_currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
+        if (_currentCollisionInteractable.Condition == ICICondition.PlayerIsStopped) _currentCollisionInteractable.Interact(this);
+    }
+
+    #endregion
+    
     #region Mining
 
     public void StartMining(ResourceSource source)

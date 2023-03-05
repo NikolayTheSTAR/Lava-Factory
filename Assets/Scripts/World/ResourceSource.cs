@@ -19,6 +19,7 @@ namespace World
         private SourceMiningData _miningData;
 
         public bool CanInteract => !IsEmpty;
+        public ICICondition Condition => ICICondition.None;
         public bool IsEmpty { get; private set; }
 
         public SourceType SourceType => sourceType;

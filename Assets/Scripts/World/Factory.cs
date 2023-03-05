@@ -9,6 +9,8 @@ namespace World
         [SerializeField] private FactoryType factoryType;
 
         public bool CanInteract => true;
+        public ICICondition Condition => ICICondition.PlayerIsStopped;
+        
         public void Interact(Player p)
         {
             
