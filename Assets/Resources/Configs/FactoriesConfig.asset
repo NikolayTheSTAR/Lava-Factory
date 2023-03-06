@@ -31,6 +31,18 @@ MonoBehaviour:
     _toItemType: 5
     resultToItemCount: 1
     craftTime: 1
+  - _factoryType: 3
+    _fromItemType: 6
+    neededFromItemCount: 20
+    _toItemType: 7
+    resultToItemCount: 1
+    craftTime: 1
+  - _factoryType: 4
+    _fromItemType: 8
+    neededFromItemCount: 100
+    _toItemType: 9
+    resultToItemCount: 1
+    craftTime: 1
   dropToFactoryPeriod: 0.1
   randomOffsetRange: 0.4
   dropWaitAfterCreateTime: 0.1

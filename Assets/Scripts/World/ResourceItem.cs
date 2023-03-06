@@ -16,6 +16,10 @@ namespace World
         Wheat,
         AppleJam,
         Board,
-        Flour
+        Flour,
+        IronOre,
+        IronBar,
+        Сrystal,
+        Brilliant
     }
 }

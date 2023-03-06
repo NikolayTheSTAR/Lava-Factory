@@ -76,6 +76,8 @@ namespace World
     {
         AppleFactory,
         LogFactory,
-        WheatFactory
+        WheatFactory,
+        IronFactory,
+        CrystalFactory
     }   
 }

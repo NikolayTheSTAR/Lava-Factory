@@ -32,12 +32,26 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     private OnStartMiningDelegate _onStartMining;
     private Action<Factory> _dropToFactoryAction;
 
+    private const string CharacterConfigPath = "Configs/CharacterConfig";
+    private CharacterConfig _characterConfig;
+
+    public CharacterConfig CharacterConfig
+    {
+        get
+        {
+            if (_characterConfig == null) _characterConfig = Resources.Load<CharacterConfig>(CharacterConfigPath);
+            return _characterConfig;
+        }
+    }
+
     public void Init(OnStartMiningDelegate onStartMining, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
         trigger.Init(OnEnter, OnExit);
         _onStartMining = onStartMining;
         _dropToFactoryAction = dropToFactoryAction;
         _dropToFactoryPeriod = dropToFactoryPeriod;
+        
+        trigger.SetRadius(CharacterConfig.TriggerRadius);
     }
 
     #region Logic Enter

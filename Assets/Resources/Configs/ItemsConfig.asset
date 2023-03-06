@@ -25,3 +25,11 @@ MonoBehaviour:
     physicalImpulse: 3
   - itemType: 5
     physicalImpulse: 3
+  - itemType: 6
+    physicalImpulse: 2
+  - itemType: 7
+    physicalImpulse: 2
+  - itemType: 8
+    physicalImpulse: 2
+  - itemType: 9
+    physicalImpulse: 2

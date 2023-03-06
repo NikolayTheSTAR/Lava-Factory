@@ -5,6 +5,8 @@ namespace World
 {
     public class EntranceTrigger : MonoBehaviour
     {
+        [SerializeField] private new SphereCollider collider;
+        
         private Action<Collider> _onTriggerEnter;
         private Action<Collider> _onTriggerExit;
 
@@ -22,6 +24,11 @@ namespace World
         private void OnTriggerExit(Collider other)
         {
             _onTriggerExit?.Invoke(other);
+        }
+
+        public void SetRadius(float radius)
+        {
+            collider.radius = radius;
         }
     }
 }
