@@ -16,6 +16,12 @@ namespace TheSTAR.GUI
         
         public ItemType ItemType => itemType;
 
+        public void Init(Sprite iconSprite, ItemType itemType)
+        {
+            iconImage.sprite = iconSprite;
+            this.itemType = itemType;
+        }
+        
         public void SetValue(int value)
         {
             gameObject.SetActive(value > 0);

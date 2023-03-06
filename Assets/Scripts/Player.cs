@@ -124,7 +124,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             if (ci == null || !ci.CanInteract) continue;
             if (ci.Condition != ICICondition.PlayerIsStopped) continue;
             ci.Interact(this);
-            //Debug.Log("Должно произойти взаимодействие c " + (ci as Factory).name);
+
             return;
         }
     }

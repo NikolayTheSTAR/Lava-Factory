@@ -18,6 +18,9 @@ namespace Configs
         [Range(0, 5)]
         [SerializeField] private float physicalImpulse = 2;
 
+        [SerializeField] private Sprite iconSprite;
+
         public float PhysicalImpulse => physicalImpulse;
+        public Sprite IconSprite => iconSprite;
     }
 }

@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using Mining;
 using TheSTAR.Data;
 using TheSTAR.GUI;
 using TheSTAR.GUI.Screens;
 using TheSTAR.Input;
 using UnityEngine;
-using UnityEngine.Serialization;
 using World;
 
 public class GameController : MonoBehaviour
@@ -22,10 +20,7 @@ public class GameController : MonoBehaviour
     /// <summary>
     /// Main logic entry point
     /// </summary>
-    private void Start()
-    {
-        Init();
-    }
+    private void Start() => Init();
 
     private void Init()
     {
@@ -33,7 +28,11 @@ public class GameController : MonoBehaviour
         world.Init(drop, mining, transactions);
         cameraController.FocusTo(world.CurrentPlayer);
         gui.Init(out var trs);
-        input.Init(gui.FindScreen<GameScreen>().JoystickContainer, world.CurrentPlayer);
+
+        var gameScreen = gui.FindScreen<GameScreen>();
+        gameScreen.Init(mining);
+        
+        input.Init(gameScreen.JoystickContainer, world.CurrentPlayer);
         transactions.Init(trs, data);
         drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopTransaction);
     }
