@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Configs;
 using Mining;
 using TheSTAR.Input;
@@ -11,17 +12,18 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
-    
-    private float _mineStrikePeriod = 1;
-    private float _dropToFactoryPeriod = 1;
 
-    private const float DefaultMineStrikeTime = 0.5f;
-
-    private bool _isMoving = false;
-    private bool _isMining = false;
-    private bool _isTransaction = false;
+    private float 
+        _mineStrikePeriod = 1,
+        _dropToFactoryPeriod = 1;
     
-    private ICollisionInteractable _currentCollisionInteractable;
+    private bool 
+        _isMoving = false, 
+        _isMining = false, 
+        _isTransaction = false;
+
+    private TransactionsController _transactions;
+    private List<ICollisionInteractable> _currentCIs;
     private ResourceSource _currentSource;
     private Factory _currentFactory;
     private Coroutine _mineCoroutine;
@@ -32,10 +34,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     private OnStartMiningDelegate _onStartMining;
     private Action<Factory> _dropToFactoryAction;
 
+    private const float DefaultMineStrikeTime = 0.5f;
     private const string CharacterConfigPath = "Configs/CharacterConfig";
+    
     private CharacterConfig _characterConfig;
 
-    public CharacterConfig CharacterConfig
+    private CharacterConfig CharacterConfig
     {
         get
         {
@@ -44,14 +48,17 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         }
     }
 
-    public void Init(OnStartMiningDelegate onStartMining, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
+    public void Init(TransactionsController transactions, OnStartMiningDelegate onStartMining, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
+        _transactions = transactions;
         trigger.Init(OnEnter, OnExit);
         _onStartMining = onStartMining;
         _dropToFactoryAction = dropToFactoryAction;
         _dropToFactoryPeriod = dropToFactoryPeriod;
         
         trigger.SetRadius(CharacterConfig.TriggerRadius);
+
+        _currentCIs = new List<ICollisionInteractable>();
     }
 
     #region Logic Enter
@@ -81,7 +88,9 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
-        _currentCollisionInteractable = ci;
+        
+        _currentCIs.Add(ci);
+        
         if (!ci.CanInteract) return;
         if (ci.Condition == ICICondition.None) ci.Interact(this);
     }
@@ -90,22 +99,34 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
-        if (_currentCollisionInteractable == ci) _currentCollisionInteractable = null;
+        if (_currentCIs.Contains(ci)) _currentCIs.Remove(ci);
+        
         ci.StopInteract(this);
     }
 
     private void OnStartMove()
     {
         _isMoving = true;
-        if (_currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
-        if (_currentCollisionInteractable.Condition == ICICondition.PlayerIsStopped) _currentCollisionInteractable.StopInteract(this);
+
+        foreach (var ci in _currentCIs)
+        {
+            if (ci == null || !ci.CanInteract) return;
+            if (ci.Condition == ICICondition.PlayerIsStopped) ci.StopInteract(this);   
+        }
     }
     
     private void OnStopMove()
     {
         _isMoving = false;
-        if (_currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
-        if (_currentCollisionInteractable.Condition == ICICondition.PlayerIsStopped) _currentCollisionInteractable.Interact(this);
+
+        foreach (var ci in _currentCIs)
+        {
+            if (ci == null || !ci.CanInteract) continue;
+            if (ci.Condition != ICICondition.PlayerIsStopped) continue;
+            ci.Interact(this);
+            //Debug.Log("Должно произойти взаимодействие c " + (ci as Factory).name);
+            return;
+        }
     }
 
     #endregion
@@ -123,17 +144,15 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         _mineCoroutine = StartCoroutine(MiningCor());
     }
         
-    public void StopMining()
+    public void StopMining(ResourceSource rs)
     {
+        _currentSource = null;
         _isMining = false;
         LeanTween.cancel(_animLTID);
-        
         if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
-
-        _animLTID =
-            LeanTween.scaleY(gameObject, 1, DefaultMineStrikeTime).id;
-
-        _currentSource = null;
+        _animLTID = LeanTween.scaleY(gameObject, 1, DefaultMineStrikeTime).id;
+        
+        RetryInteract();
     }
 
     private IEnumerator MiningCor()
@@ -162,9 +181,19 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     public void RetryInteract()
     {
-        if (_isMining || _currentCollisionInteractable == null || !_currentCollisionInteractable.CanInteract) return;
-
-        _currentCollisionInteractable.Interact(this);
+        foreach (var ci in _currentCIs)
+        {
+            if (ci == null || !ci.CanInteract) continue;
+            
+            // conditions
+            if (ci.Condition == ICICondition.PlayerIsStopped && _isMoving) continue;
+            
+            // check for Factory
+            if (ci is Factory f && !_transactions.CanStartTransaction(f)) continue;
+            
+            ci.Interact(this);
+            return;
+        }
     }
     
     #endregion
@@ -175,7 +204,6 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         _isTransaction = true;
         _currentFactory = factory;
-
         _transactionCoroutine = StartCoroutine(TransactionsCor());
     }
     
@@ -184,6 +212,8 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         _isTransaction = false;
         if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
         _currentFactory = null;
+        
+        RetryInteract();
     }
     
     private IEnumerator TransactionsCor()
@@ -198,13 +228,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     #endregion
 
-    public void OnStartReceiving()
-    {
-        
-    }
+    public void OnStartReceiving() {}
 
-    public void OnCompleteReceiving()
-    {
-        // nothing
-    }
+    public void OnCompleteReceiving() {}
 }

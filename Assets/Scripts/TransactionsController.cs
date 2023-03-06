@@ -70,6 +70,8 @@ public class TransactionsController : MonoBehaviour
     {
         foreach (var tr in _transactionReactables) tr.OnTransactionReact(itemType, finalValue);
     }
+
+    public bool CanStartTransaction(Factory factory) => GetItemsCount(factory.FactoryData.FromItemType) > 0;
 }
 
 public interface ITransactionReactable

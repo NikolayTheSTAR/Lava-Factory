@@ -37,9 +37,9 @@ namespace World
                 sourceData = _miningController.SourcesConfig.SourceDatas[(int)sourceType];
                 source.Init(sourceData, dropItemsContainer.DropFromSenderToPlayer, (s) =>
                 {
-                    CurrentPlayer.StopMining();
+                    CurrentPlayer.StopMining(s);
                     _miningController.StartSourceRecovery(s);
-                }, CurrentPlayer.RetryInteract);
+                }, () => CurrentPlayer.RetryInteract());
             }
 
             FactoryData factoryData = null;
@@ -54,7 +54,7 @@ namespace World
         {
             var playerPrefab = Resources.Load<Player>(PlayerPrefabPath);
             CurrentPlayer = Instantiate(playerPrefab, playerSpawnPoint.position, Quaternion.identity, transform);
-            CurrentPlayer.Init(_miningController.OnStartMining, _dropItemsContainer.DropToFactory, _transactions.FactoriesConfig.DropToFactoryPeriod);
+            CurrentPlayer.Init(_transactions, _miningController.OnStartMining, _dropItemsContainer.DropToFactory, _transactions.FactoriesConfig.DropToFactoryPeriod);
         }
         
         #if UNITY_EDITOR

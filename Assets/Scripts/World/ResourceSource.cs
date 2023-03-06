@@ -98,7 +98,7 @@ namespace World
 
         public void StopInteract(Player p)
         {
-            p.StopMining();
+            p.StopMining(this);
         }
         
         public void OnCompleteDrop()

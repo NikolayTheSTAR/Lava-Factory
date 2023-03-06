@@ -19,6 +19,8 @@ namespace World
         private int _itemsInStorageCount = 0;
         private int _itemsOnWayCount = 0;
         private bool _isSending = false;
+
+        public FactoryData FactoryData => _factoryData;
         
         private Action<IDropSender, ItemType> _dropItemAction;
 
