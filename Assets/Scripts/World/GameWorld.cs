@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Configs;
 using Mining;
 using UnityEngine;
@@ -54,5 +56,17 @@ namespace World
             CurrentPlayer = Instantiate(playerPrefab, playerSpawnPoint.position, Quaternion.identity, transform);
             CurrentPlayer.Init(_miningController.OnStartMining, _dropItemsContainer.DropToFactory, _transactions.FactoriesConfig.DropToFactoryPeriod);
         }
+        
+        #if UNITY_EDITOR
+
+        [ContextMenu("RegisterSources")]
+        private void RegisterSources()
+        {
+            var allSources = GameObject.FindGameObjectsWithTag("Source");
+            var tempSources = allSources.Select(sourceObject => sourceObject.GetComponent<ResourceSource>()).Where(s => s != null).ToArray();
+            sources = tempSources;
+        }
+        
+        #endif
     }
 }

@@ -112,6 +112,7 @@ namespace World
         AppleTree,
         IronMine,
         CrystalMine,
-        WheatField
+        WheatField,
+        LogTree
     }
 }
