@@ -1,3 +1,4 @@
+using Configs;
 using Mining;
 using UnityEngine;
 
@@ -26,20 +27,24 @@ namespace World
             if (CurrentPlayer != null) Destroy(CurrentPlayer);
             SpawnPlayer();
 
+            SourceType sourceType;
+            SourceData sourceData;
             foreach (var source in sources)
             {
-                var sourceType = source.SourceType;
-                var miningData = _miningController.SourcesConfig.SourceDatas[(int)sourceType].MiningData;
-                source.Init(miningData, dropItemsContainer.DropFromSource, (s) =>
+                sourceType = source.SourceType;
+                sourceData = _miningController.SourcesConfig.SourceDatas[(int)sourceType];
+                source.Init(sourceData, dropItemsContainer.DropFromSenderToPlayer, (s) =>
                 {
                     CurrentPlayer.StopMining();
                     _miningController.StartSourceRecovery(s);
                 }, CurrentPlayer.RetryInteract);
             }
 
+            FactoryData factoryData = null;
             foreach (var factory in factories)
             {
-                //factory.Init(dropItemsContainer.DropToFactory);
+                factoryData = transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
+                factory.Init(factoryData, dropItemsContainer.DropFromSenderToPlayer);
             }
         }
     

@@ -1,38 +1,38 @@
 using System;
 using Configs;
+using Mining;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace World
 {
-    public class ResourceSource : MonoBehaviour, ICollisionInteractable
+    public class ResourceSource : MonoBehaviour, ICollisionInteractable, IDropSender
     {
         [SerializeField] private SourceType sourceType;
         [SerializeField] private GameObject prolificVisual;
         [SerializeField] private GameObject emptyVisual;
 
         private int _animLTID = -1;
-        private Action<ResourceSource> _dropItemAction;
+        private Action<IDropSender, ItemType> _dropItemAction;
         private Action<ResourceSource> _onEmptying;
         private Action _onRecovery;
         private int _health = 1;
-        private SourceMiningData _miningData;
+        private SourceData _sourceData;
 
         public bool CanInteract => !IsEmpty;
         public ICICondition Condition => ICICondition.None;
         public bool IsEmpty { get; private set; }
 
         public SourceType SourceType => sourceType;
-        public SourceMiningData MiningData => _miningData;
+        public SourceData SourceData => _sourceData;
 
-        public void Init(SourceMiningData miningData, Action<ResourceSource> dropItemAction, Action<ResourceSource> onEmptying, Action onRecovery)
+        public void Init(SourceData sourceData, Action<IDropSender, ItemType> dropItemAction, Action<ResourceSource> onEmptying, Action onRecovery)
         {
-            _miningData = miningData;
+            _sourceData = sourceData;
             _dropItemAction = dropItemAction;
             _onEmptying = onEmptying;
             _onRecovery = onRecovery;
-
-            _health = miningData.MaxHitsCount;
+            _health = sourceData.MiningData.MaxHitsCount;
         }
         
         public void TakeHit()
@@ -49,8 +49,8 @@ namespace World
                 _animLTID =
                 LeanTween.scaleY(gameObject, 1f, 0.2f).id;
             }).id;
-
-            _dropItemAction?.Invoke(this);
+            
+            for (var i = 0; i < _sourceData.MiningData.OneHitDropCount; i++) _dropItemAction?.Invoke(this, _sourceData.DropItemType);
             
             // emptying
             if (_health <= 0) Empty();
@@ -77,7 +77,7 @@ namespace World
             prolificVisual.SetActive(true);
             emptyVisual.SetActive(false);
             IsEmpty = false;
-            _health = _miningData.MaxHitsCount;
+            _health = _sourceData.MiningData.MaxHitsCount;
             _onRecovery?.Invoke();
             
             // anim
@@ -99,6 +99,11 @@ namespace World
         public void StopInteract(Player p)
         {
             p.StopMining();
+        }
+        
+        public void OnCompleteDrop()
+        {
+            // do nothing
         }
     }
 

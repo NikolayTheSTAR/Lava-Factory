@@ -15,13 +15,19 @@ MonoBehaviour:
   factoryDatas:
   - _factoryType: 0
     _fromItemType: 0
+    neededFromItemCount: 10
     _toItemType: 3
+    resultToItemCount: 2
   - _factoryType: 1
     _fromItemType: 1
+    neededFromItemCount: 10
     _toItemType: 4
+    resultToItemCount: 1
   - _factoryType: 2
     _fromItemType: 2
+    neededFromItemCount: 10
     _toItemType: 5
+    resultToItemCount: 1
   dropToFactoryPeriod: 0.1
   randomOffsetRange: 0.4
   dropWaitAfterCreateTime: 0.1

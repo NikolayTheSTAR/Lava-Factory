@@ -25,10 +25,10 @@ namespace Mining
         private Action _onFailDropToFactoryAction;
 
         private Vector3 CreateItemPosOffset => _standardDropOffset +
-                                               new Vector3(
-                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange), 
-                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange),
-                                                   Random.Range(-_randomOffsetRange, _randomOffsetRange));
+           new Vector3(
+               Random.Range(-_randomOffsetRange, _randomOffsetRange), 
+               Random.Range(-_randomOffsetRange, _randomOffsetRange),
+               Random.Range(-_randomOffsetRange, _randomOffsetRange));
 
         public void Init(TransactionsController transactions, MiningController miningController, IDropReceiver playerDropReceiver, Action onFailDropToFactoryAction)
         {
@@ -42,27 +42,26 @@ namespace Mining
             _onFailDropToFactoryAction = onFailDropToFactoryAction;
         }
         
-        public void DropFromSource(ResourceSource source)
+        public void DropFromSenderToPlayer(IDropSender sender, ItemType dropItemType)
         {
-            var miningData =_miningController.SourcesConfig.SourceDatas[(int)source.SourceType].MiningData;
-
-            for (var i = 0; i < miningData.OneHitDropCount; i++)
-            {
-                var dropItemType = _miningController.SourcesConfig.SourceDatas[(int)source.SourceType].DropItemType;
-                var offset = CreateItemPosOffset;
-            
-                DropItemTo(dropItemType, source.transform.position + offset, _playerDropReceiver, () => _transactions.AddItem(dropItemType));
-            }
+            var offset = CreateItemPosOffset;
+            DropItemTo(dropItemType, sender.transform.position + offset, _playerDropReceiver, () =>
+            {   
+                _transactions.AddItem(dropItemType);
+                sender.OnCompleteDrop();
+            });
         }
         
-        private void DropItemTo(ItemType itemType, Vector3 startPos, IDropReceiver receiver, Action completeAction)
+        private void DropItemTo(ItemType itemType, Vector3 startPos, IDropReceiver receiver, Action completeAction = null)
         {
+            receiver.OnStartReceiving();
+            
             var item = GetItemFromPool(itemType, startPos);
             item.transform.localScale = Vector3.zero;
             
-            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => { LeanTween.value(0, 1, _dropWaitAfterCreateTime).setOnComplete(FlyToPlayer);});
+            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => { LeanTween.value(0, 1, _dropWaitAfterCreateTime).setOnComplete(FlyToReceiver);});
 
-            void FlyToPlayer()
+            void FlyToReceiver()
             {
                 LeanTween.value(0, 1, FlyToReceiverTime).setOnUpdate((value) =>
                 {
@@ -78,6 +77,7 @@ namespace Mining
                 {
                     item.gameObject.SetActive(false);
                     completeAction?.Invoke();
+                    receiver.OnCompleteReceiving();
                 });
             }
         }
@@ -89,7 +89,7 @@ namespace Mining
             var toItemType = factoryData.ToItemType;
             
             _transactions.ReduceItem(fromItemType, 1, false, 
-                () => DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory, null), 
+                () => DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory), 
                 () => _onFailDropToFactoryAction());
         }
         
@@ -121,8 +121,17 @@ namespace Mining
         }
     }
 
+    public interface IDropSender
+    {
+        Transform transform { get; }
+        void OnCompleteDrop();
+    }
+
     public interface IDropReceiver
     {
         Transform transform { get; }
+
+        void OnStartReceiving();
+        void OnCompleteReceiving();
     }
 }

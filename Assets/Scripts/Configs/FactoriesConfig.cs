@@ -1,6 +1,4 @@
 using System;
-using System.ComponentModel;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using World;
 
@@ -26,9 +24,13 @@ namespace Configs
     {
         [SerializeField] private FactoryType _factoryType;
         [SerializeField] private ItemType _fromItemType;
+        [SerializeField] private int neededFromItemCount;
         [SerializeField] private ItemType _toItemType;
+        [SerializeField] private int resultToItemCount;
 
         public ItemType FromItemType => _fromItemType;
+        public int NeededFromItemCount => neededFromItemCount;
         public ItemType ToItemType => _toItemType;
+        public int ResultToItemCount => resultToItemCount;
     }
 }

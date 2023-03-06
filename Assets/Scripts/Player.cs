@@ -1,12 +1,10 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Configs;
 using Mining;
 using TheSTAR.Input;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization;
 using World;
 
 public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
@@ -79,8 +77,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
         if (_currentCollisionInteractable == ci) _currentCollisionInteractable = null;
-        
-        if (ci.Condition == ICICondition.None) ci.StopInteract(this);
+        ci.StopInteract(this);
     }
 
     private void OnStartMove()
@@ -179,11 +176,21 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         while (_isTransaction)
         {
-            _dropToFactoryAction(_currentFactory);
+            if (_currentFactory.CanInteract) _dropToFactoryAction(_currentFactory);
             yield return new WaitForSeconds(_dropToFactoryPeriod);
         }
         yield return null;
     }
 
     #endregion
+
+    public void OnStartReceiving()
+    {
+        
+    }
+
+    public void OnCompleteReceiving()
+    {
+        // nothing
+    }
 }

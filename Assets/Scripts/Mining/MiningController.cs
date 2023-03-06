@@ -63,9 +63,9 @@ namespace Mining
             var recoveryDateTime = 
                 DateTime.Now + 
                 new TimeSpan(
-                    source.MiningData.RecoveryTime.Hours, 
-                    source.MiningData.RecoveryTime.Minutes,
-                    source.MiningData.RecoveryTime.Seconds);
+                    source.SourceData.MiningData.RecoveryTime.Hours, 
+                    source.SourceData.MiningData.RecoveryTime.Minutes,
+                    source.SourceData.MiningData.RecoveryTime.Seconds);
             
             var recoveryData = new RecoveryData(source, recoveryDateTime);
             

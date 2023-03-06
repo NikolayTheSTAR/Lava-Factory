@@ -15,3 +15,13 @@ MonoBehaviour:
   items:
   - itemType: 0
     physicalImpulse: 3
+  - itemType: 1
+    physicalImpulse: 3
+  - itemType: 2
+    physicalImpulse: 3
+  - itemType: 3
+    physicalImpulse: 3
+  - itemType: 4
+    physicalImpulse: 3
+  - itemType: 5
+    physicalImpulse: 3
