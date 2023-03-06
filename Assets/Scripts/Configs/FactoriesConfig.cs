@@ -27,10 +27,14 @@ namespace Configs
         [SerializeField] private int neededFromItemCount;
         [SerializeField] private ItemType _toItemType;
         [SerializeField] private int resultToItemCount;
+        
+        [Range(0, 10)]
+        [SerializeField] private float craftTime = 1;
 
         public ItemType FromItemType => _fromItemType;
         public int NeededFromItemCount => neededFromItemCount;
         public ItemType ToItemType => _toItemType;
         public int ResultToItemCount => resultToItemCount;
+        public float CraftTime => craftTime;
     }
 }

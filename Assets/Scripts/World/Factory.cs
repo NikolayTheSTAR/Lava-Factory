@@ -45,7 +45,14 @@ namespace World
             
             _itemsInStorageCount -= _factoryData.NeededFromItemCount;
             _isSending = true;
-            for (int i = 0; i < _factoryData.ResultToItemCount; i++) _dropItemAction(this, _factoryData.ToItemType);
+            
+            // wait for craft
+            
+            LeanTween.value(0, 1, _factoryData.CraftTime).setOnComplete(() =>
+            {
+                for (var i = 0; i < _factoryData.ResultToItemCount; i++) 
+                    _dropItemAction(this, _factoryData.ToItemType);
+            });
         }
 
         public void OnCompleteDrop()
