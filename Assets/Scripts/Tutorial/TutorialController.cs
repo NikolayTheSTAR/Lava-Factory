@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Sirenix.OdinInspector;
+using TheSTAR.Data;
 using UnityEngine;
 using World;
 
@@ -14,38 +15,38 @@ namespace Tutorial
         private Player _player;
         private TutorialData _currentTutorial;
         private bool _inProcess = false;
+        private DataController _data;
 
-        public void Init(GameController gameController, Player p)
+        public void Init(GameController gameController, DataController data, Player p)
         {
+            _data = data;
             _player = p;
-            gameController.OnStartGameEvent += OnStartGame;
-
+            
             for (int i = 0; i < tutorialDatas.Length; i++)
             {
                 var tutorialData = tutorialDatas[i];
 
-                if (tutorialData.Condition == TutorialShowCondition.ByFarm)
+                switch (tutorialData.Condition)
                 {
-                    Action unsubscribe = null;
-                    unsubscribe = () => tutorialData.FarmSource.OnCompleteFarmEvent -= StartTutorialAction;
-                    tutorialData.FarmSource.OnCompleteFarmEvent += StartTutorialAction;
-                    
-                    void StartTutorialAction()
+                    case TutorialShowCondition.ByStart:
+                        gameController.OnStartGameEvent += () => StartTutorial(tutorialData);
+                        break;
+                    case TutorialShowCondition.ByFarm:
                     {
-                        StartTutorial(tutorialData);
-                        unsubscribe?.Invoke();
+                        Action unsubscribe = null;
+                        unsubscribe = () => tutorialData.FarmSource.OnCompleteFarmEvent -= StartTutorialAction;
+                        tutorialData.FarmSource.OnCompleteFarmEvent += StartTutorialAction;
+                    
+                        void StartTutorialAction()
+                        {
+                            StartTutorial(tutorialData);
+                            unsubscribe?.Invoke();
+                        }
+
+                        break;
                     }
                 }
             }
-        }
-        
-        private void OnStartGame()
-        {
-            // check start tutorial
-            var tutor = Array.Find(tutorialDatas, info => info.Condition == TutorialShowCondition.ByStart);
-            if (tutor == null) return;
-
-            StartTutorial(tutor);
         }
 
         private void UpdateInCurrentTutorial()
@@ -55,7 +56,7 @@ namespace Tutorial
 
         private void StartTutorial(TutorialData tutorial)
         {
-            if (_inProcess) return;
+            if (_inProcess || _data.gameData.IsTutorialComplete(tutorial.ID)) return;
             
             _inProcess = true;
             
@@ -72,13 +73,14 @@ namespace Tutorial
         private void StopTutorial()
         {
             _currentTutorial.GoalObject.OnEnterEvent -= StopTutorial;
+            _data.gameData.CompleteTutorial(_currentTutorial.ID);
             
             _inProcess = false;
             
             arrow.gameObject.SetActive(false);
             arrow.StopAnim();
             _currentTutorial = null;
-            
+
             _player.OnMoveEvent -= UpdateInCurrentTutorial;
         }
     }
@@ -86,6 +88,7 @@ namespace Tutorial
     [Serializable]
     public class TutorialData
     {
+        [SerializeField] private string id;
         [SerializeField] private GameWorldCiObject goalObject;
         [SerializeField] private TutorialShowCondition condition;
 
@@ -95,6 +98,7 @@ namespace Tutorial
         public GameWorldCiObject GoalObject => goalObject;
         public TutorialShowCondition Condition => condition;
         public ResourceSource FarmSource => farmSource;
+        public string ID => id;
     }
 
     public enum TutorialShowCondition

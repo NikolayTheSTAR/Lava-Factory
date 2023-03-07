@@ -942,6 +942,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameData:
     itemCounts: []
+    completedTutorials: []
   clearData: 0
 --- !u!1001 &154383504
 PrefabInstance:
@@ -2353,10 +2354,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorialDatas:
-  - goalObject: {fileID: 1547816396}
+  - id: farm
+    goalObject: {fileID: 1547816396}
     condition: 1
     farmSource: {fileID: 0}
-  - goalObject: {fileID: 2021491893}
+  - id: spot
+    goalObject: {fileID: 2021491893}
     condition: 2
     farmSource: {fileID: 1547816396}
   arrow: {fileID: 267247182}

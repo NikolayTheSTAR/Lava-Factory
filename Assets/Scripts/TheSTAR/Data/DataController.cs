@@ -79,6 +79,7 @@ namespace TheSTAR.Data
         public class GameData
         {
             public List<ItemCountData> itemCounts = new List<ItemCountData>();
+            public List<string> completedTutorials = new List<string>();
 
             public void AddItems(ItemType itemType, int count, out int result)
             {
@@ -102,6 +103,13 @@ namespace TheSTAR.Data
 
                 return itemCountData.Count;
             }
+
+            public void CompleteTutorial(string id)
+            {
+                if (!IsTutorialComplete(id)) completedTutorials.Add(id);
+            }
+
+            public bool IsTutorialComplete(string id) => completedTutorials.Contains(id);
         }
 
         [Serializable]
