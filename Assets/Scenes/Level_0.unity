@@ -5342,6 +5342,7 @@ MonoBehaviour:
   gui: {fileID: 179512228}
   useTutorial: 1
   tutorial: {fileID: 358514648}
+  startGameDelay: 0.5
 --- !u!1 &1047901437
 GameObject:
   m_ObjectHideFlags: 0

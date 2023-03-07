@@ -25,6 +25,8 @@ public class GameController : MonoBehaviour
     [ShowIf("useTutorial")]
     [SerializeField] private TutorialController tutorial;
 
+    [Space] [SerializeField] private float startGameDelay = 0.5f;
+
     public event Action OnStartGameEvent;
 
     /// <summary>
@@ -33,7 +35,7 @@ public class GameController : MonoBehaviour
     private void Start()
     {
         Init();
-        StartGame();
+        Invoke(nameof(StartGame), startGameDelay);
     }
 
     private void StartGame()
@@ -54,6 +56,7 @@ public class GameController : MonoBehaviour
         input.Init(gameScreen.JoystickContainer, world.CurrentPlayer);
         transactions.Init(trs, data);
         drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopTransaction);
-        tutorial.Init(this, data, world.CurrentPlayer);
+        
+        if (useTutorial) tutorial.Init(this, data, world.CurrentPlayer);
     }
 }
