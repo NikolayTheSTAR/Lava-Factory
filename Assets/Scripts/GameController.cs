@@ -55,7 +55,7 @@ public class GameController : MonoBehaviour
         
         input.Init(gameScreen.JoystickContainer, world.CurrentPlayer);
         transactions.Init(trs, data);
-        drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopTransaction);
+        drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopCraft);
         
         if (useTutorial) tutorial.Init(this, data, world.CurrentPlayer);
     }

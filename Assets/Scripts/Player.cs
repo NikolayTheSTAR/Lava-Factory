@@ -12,6 +12,7 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
+    [SerializeField] private Transform visualTran;
 
     private float 
         _mineStrikePeriod = 1,
@@ -139,54 +140,6 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
     
     #endregion
     
-    #region Mining
-
-    public void StartMining(ResourceSource source)
-    {
-        _currentSource = source;
-        _onStartMining(source.SourceType, out var miningData);
-        _mineStrikePeriod = miningData.MiningPeriod;
-        
-        _isMining = true;
-        
-        _mineCoroutine = StartCoroutine(MiningCor());
-    }
-        
-    public void StopMining(ResourceSource rs)
-    {
-        _currentSource = null;
-        _isMining = false;
-        LeanTween.cancel(_animLTID);
-        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
-        _animLTID = LeanTween.scaleY(gameObject, 1, DefaultMineStrikeTime).id;
-        
-        RetryInteract();
-    }
-
-    private IEnumerator MiningCor()
-    {
-        while (_isMining)
-        {
-            DoMineStrike();
-            yield return new WaitForSeconds(_mineStrikePeriod);
-        }
-        yield return null;
-    }
-
-    private void DoMineStrike()
-    {
-        if (_animLTID != -1) LeanTween.cancel(_animLTID);
-
-        var animTimeMultiply = _mineStrikePeriod > DefaultMineStrikeTime ? 1 : (_mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
-        
-        _animLTID =
-            LeanTween.scaleY(gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
-            {
-                _animLTID =
-                    LeanTween.scaleY(gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
-            }).id;
-    }
-
     public void RetryInteract()
     {
         foreach (var ci in _currentCIs)
@@ -204,20 +157,80 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
         }
     }
     
+    #region Mining
+
+    public void StartMining(ResourceSource source)
+    {
+        BreakAnim();
+        _currentSource = source;
+        _onStartMining(source.SourceType, out var miningData);
+        _mineStrikePeriod = miningData.MiningPeriod;
+        
+        _isMining = true;
+        
+        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
+        _mineCoroutine = StartCoroutine(MiningCor());
+    }
+        
+    public void StopMining(ResourceSource rs)
+    {
+        if (_currentSource != rs) return;
+            
+        _currentSource = null;
+        _isMining = false;
+        BreakAnim();
+        
+        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
+        
+        RetryInteract();
+    }
+
+    private IEnumerator MiningCor()
+    {
+        while (_isMining)
+        {
+            DoMineStrike();
+            yield return new WaitForSeconds(_mineStrikePeriod);
+        }
+        yield return null;
+    }
+
+    private void DoMineStrike()
+    {
+        BreakAnim();
+
+        var animTimeMultiply = _mineStrikePeriod > DefaultMineStrikeTime ? 1 : (_mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
+        
+        _animLTID =
+            LeanTween.scaleY(visualTran.gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
+            {
+                _animLTID =
+                    LeanTween.scaleY(visualTran.gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
+            }).id;
+    }
+    
+    private void BreakAnim()
+    {
+        if (_animLTID == -1) return;
+        LeanTween.cancel(_animLTID);
+        visualTran.localScale = Vector3.one;
+        _animLTID = -1;
+    }
+    
     #endregion
 
-    #region Transactions
+    #region Craft
 
-    public void StartTransaction(Factory factory)
+    public void StartCraft(Factory factory)
     {
         _isTransaction = true;
         _currentFactory = factory;
         
         if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
-        _transactionCoroutine = StartCoroutine(TransactionsCor());
+        _transactionCoroutine = StartCoroutine(CraftCor());
     }
     
-    public void StopTransaction()
+    public void StopCraft()
     {
         _isTransaction = false;
         if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
@@ -226,7 +239,7 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
         RetryInteract();
     }
     
-    private IEnumerator TransactionsCor()
+    private IEnumerator CraftCor()
     {
         while (_isTransaction)
         {

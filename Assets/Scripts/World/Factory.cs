@@ -34,12 +34,12 @@ namespace World
         
         public override void Interact(Player p)
         {
-            p.StartTransaction(this);
+            p.StartCraft(this);
         }
 
         public override void StopInteract(Player p)
         {
-            p.StopTransaction();
+            p.StopCraft();
         }
 
         private void AddNeededResource()
