@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using Configs;
 using Mining;
 using UnityEngine;
+using Tutorial;
 
 namespace World
 {
-    public class Factory : MonoBehaviour, ICollisionInteractable, IDropReceiver, IDropSender
+    [Serializable]
+    public class Factory : GameWorldCiObject, IDropReceiver, IDropSender
     {
         [SerializeField] private FactoryType factoryType;
 
-        public bool CanInteract => !_isSending && (_itemsInStorageCount + _itemsOnWayCount) < _factoryData.NeededFromItemCount;
-        public ICICondition Condition => ICICondition.PlayerIsStopped;
+        public override bool CanInteract => !_isSending && (_itemsInStorageCount + _itemsOnWayCount) < _factoryData.NeededFromItemCount;
+        public override CiCondition Condition => CiCondition.PlayerIsStopped;
         public FactoryType FactoryType => factoryType;
 
         private FactoryData _factoryData;
@@ -30,12 +32,12 @@ namespace World
             _dropItemAction = dropItemAction;
         }
         
-        public void Interact(Player p)
+        public override void Interact(Player p)
         {
             p.StartTransaction(this);
         }
 
-        public void StopInteract(Player p)
+        public override void StopInteract(Player p)
         {
             p.StopTransaction();
         }

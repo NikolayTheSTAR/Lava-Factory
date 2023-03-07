@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 
 namespace World
 {
-    public class ResourceSource : MonoBehaviour, ICollisionInteractable, IDropSender
+    [Serializable]
+    public class ResourceSource : GameWorldCiObject, IDropSender
     {
         [SerializeField] private SourceType sourceType;
         [SerializeField] private GameObject prolificVisual;
@@ -18,9 +19,11 @@ namespace World
         private Action _onRecovery;
         private int _health = 1;
         private SourceData _sourceData;
+        
+        public event Action OnCompleteFarmEvent;
 
-        public bool CanInteract => !IsEmpty;
-        public ICICondition Condition => ICICondition.None;
+        public override bool CanInteract => !IsEmpty;
+        public override CiCondition Condition => CiCondition.None;
         public bool IsEmpty { get; private set; }
 
         public SourceType SourceType => sourceType;
@@ -91,19 +94,19 @@ namespace World
                 }).id;
         }
 
-        public void Interact(Player p)
+        public override void Interact(Player p)
         {
             p.StartMining(this);
         }
 
-        public void StopInteract(Player p)
+        public override void StopInteract(Player p)
         {
             p.StopMining(this);
         }
         
         public void OnCompleteDrop()
         {
-            // do nothing
+            OnCompleteFarmEvent?.Invoke();
         }
     }
 

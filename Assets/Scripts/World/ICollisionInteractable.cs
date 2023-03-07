@@ -1,16 +1,21 @@
+using System;
+
 namespace World
 {
     public interface ICollisionInteractable
     {
         bool CanInteract { get; }
-        ICICondition Condition { get; }
+        
+        CiCondition Condition { get; }
 
         void Interact(Player p);
 
         void StopInteract(Player p);
+
+        void OnEnter();
     }
 
-    public enum ICICondition
+    public enum CiCondition
     {
         None,
         PlayerIsStopped

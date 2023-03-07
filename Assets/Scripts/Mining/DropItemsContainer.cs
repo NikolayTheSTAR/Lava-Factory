@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TheSTAR.Data;
 using Unity.Mathematics;
 using UnityEngine;
 using World;
@@ -84,8 +83,6 @@ namespace Mining
 
         public void DropToFactory(Factory factory)
         {
-            Debug.Log("DropToFactory");
-            
             var factoryData = _transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
             var fromItemType = factoryData.FromItemType;
             var toItemType = factoryData.ToItemType;

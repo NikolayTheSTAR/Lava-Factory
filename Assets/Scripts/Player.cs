@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using World;
 
-public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
+public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, IDropReceiver
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
@@ -33,6 +33,8 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     public delegate void OnStartMiningDelegate(SourceType sourceType, out SourceMiningData miningData);
     private OnStartMiningDelegate _onStartMining;
     private Action<Factory> _dropToFactoryAction;
+    
+    public event Action OnMoveEvent;
 
     private const float DefaultMineStrikeTime = 0.5f;
     private const string CharacterConfigPath = "Configs/CharacterConfig";
@@ -73,6 +75,8 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             finalMoveDirection = transform.position + tempMoveDirection;
             
             if (!_isMoving) OnStartMove();
+
+            OnMove();
         }
         else
         {
@@ -89,10 +93,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
         
+        ci.OnEnter();
+        
         _currentCIs.Add(ci);
         
         if (!ci.CanInteract) return;
-        if (ci.Condition == ICICondition.None) ci.Interact(this);
+        if (ci.Condition == CiCondition.None) ci.Interact(this);
     }
     
     private void OnExit(Collider other)
@@ -111,9 +117,11 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         foreach (var ci in _currentCIs)
         {
             if (ci == null || !ci.CanInteract) return;
-            if (ci.Condition == ICICondition.PlayerIsStopped) ci.StopInteract(this);   
+            if (ci.Condition == CiCondition.PlayerIsStopped) ci.StopInteract(this);   
         }
     }
+    
+    private void OnMove() => OnMoveEvent?.Invoke();
     
     private void OnStopMove()
     {
@@ -122,13 +130,13 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         foreach (var ci in _currentCIs)
         {
             if (ci == null || !ci.CanInteract) continue;
-            if (ci.Condition != ICICondition.PlayerIsStopped) continue;
+            if (ci.Condition != CiCondition.PlayerIsStopped) continue;
             ci.Interact(this);
 
             return;
         }
     }
-
+    
     #endregion
     
     #region Mining
@@ -186,7 +194,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             if (ci == null || !ci.CanInteract) continue;
             
             // conditions
-            if (ci.Condition == ICICondition.PlayerIsStopped && _isMoving) continue;
+            if (ci.Condition == CiCondition.PlayerIsStopped && _isMoving) continue;
             
             // check for Factory
             if (ci is Factory f && !_transactions.CanStartTransaction(f)) continue;
