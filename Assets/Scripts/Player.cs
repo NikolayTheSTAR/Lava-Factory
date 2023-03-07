@@ -31,8 +31,6 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
     private Coroutine _transactionCoroutine;
     private int _animLTID = -1;
 
-    public delegate void OnStartMiningDelegate(SourceType sourceType, out SourceMiningData miningData);
-    private OnStartMiningDelegate _onStartMining;
     private Action<Factory> _dropToFactoryAction;
     
     public event Action OnMoveEvent;
@@ -51,11 +49,10 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
         }
     }
 
-    public void Init(TransactionsController transactions, OnStartMiningDelegate onStartMining, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
+    public void Init(TransactionsController transactions, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
         _transactions = transactions;
         trigger.Init(OnEnter, OnExit);
-        _onStartMining = onStartMining;
         _dropToFactoryAction = dropToFactoryAction;
         _dropToFactoryPeriod = dropToFactoryPeriod;
         
@@ -163,7 +160,7 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
     {
         BreakAnim();
         _currentSource = source;
-        _onStartMining(source.SourceType, out var miningData);
+        var miningData = source.SourceData.MiningData;
         _mineStrikePeriod = miningData.MiningPeriod;
         
         _isMining = true;
