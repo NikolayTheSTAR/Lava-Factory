@@ -15,7 +15,7 @@ namespace Configs
     public class ItemData
     {
         [SerializeField] private ItemType itemType;
-        [Range(0, 5)]
+        [Range(0, 10)]
         [SerializeField] private float physicalImpulse = 2;
 
         [SerializeField] private Sprite iconSprite;

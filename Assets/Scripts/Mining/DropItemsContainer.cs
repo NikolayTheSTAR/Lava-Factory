@@ -65,12 +65,12 @@ namespace Mining
             {
                 LeanTween.value(0, 1, FlyToReceiverTime).setOnUpdate((value) =>
                 {
-                    var difference = receiver.transform.position - startPos;
-                    item.transform.position = startPos + value * (difference);
+                    var way = receiver.transform.position - startPos;
+                    item.transform.position = startPos + value * (way);
                     
                     // physic imitation
                     var impulseForce = _miningController.ItemsConfig.Items[(int)itemType].PhysicalImpulse;
-                    var dopValueY = Math.Abs((value * value - value) * impulseForce * difference.x);
+                    var dopValueY = Math.Abs((value * value - value) * impulseForce);
                     item.transform.position += new Vector3(0, dopValueY, 0);
 
                 }) .setOnComplete(() =>
@@ -84,6 +84,8 @@ namespace Mining
 
         public void DropToFactory(Factory factory)
         {
+            Debug.Log("DropToFactory");
+            
             var factoryData = _transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
             var fromItemType = factoryData.FromItemType;
             var toItemType = factoryData.ToItemType;

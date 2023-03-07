@@ -204,6 +204,8 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         _isTransaction = true;
         _currentFactory = factory;
+        
+        if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
         _transactionCoroutine = StartCoroutine(TransactionsCor());
     }
     
