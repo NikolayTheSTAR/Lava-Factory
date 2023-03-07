@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Sirenix.OdinInspector;
 using TheSTAR.Data;
 using UnityEngine;
@@ -9,7 +8,12 @@ namespace Tutorial
 {
     public class TutorialController : MonoBehaviour
     {
+        [SerializeField] private bool useTutorial;
+        
+        [ShowIf("useTutorial")]
         [SerializeField] private TutorialData[] tutorialDatas = new TutorialData[0];
+        
+        [ShowIf("useTutorial")]
         [SerializeField] private TutorialArrow arrow;
 
         private Player _player;
@@ -19,6 +23,8 @@ namespace Tutorial
 
         public void Init(GameController gameController, DataController data, Player p)
         {
+            if (!useTutorial) return;
+            
             _data = data;
             _player = p;
             

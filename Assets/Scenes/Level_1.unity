@@ -2112,6 +2112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73cb28a5e67644af88227a4726783233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useTutorial: 1
   tutorialDatas:
   - id: farm
     goalObject: {fileID: 3422493302250450488}
@@ -4833,7 +4834,6 @@ MonoBehaviour:
   data: {fileID: 126127212}
   transactions: {fileID: 1186933971}
   gui: {fileID: 179512228}
-  useTutorial: 1
   tutorial: {fileID: 358514648}
   startGameDelay: 0.5
 --- !u!1 &1047901437
