@@ -11,8 +11,7 @@ namespace World
         [SerializeField] private Transform playerSpawnPoint;
         [SerializeField] private ResourceSource[] sources = new ResourceSource[0];
         [SerializeField] private Factory[] factories = new Factory[0];
-
-        private const string PlayerPrefabPath = "Player";
+        [SerializeField] private Player playerPrefab;
     
         public Player CurrentPlayer { get; private set; }
 
@@ -45,6 +44,8 @@ namespace World
             FactoryData factoryData = null;
             foreach (var factory in factories)
             {
+                if (factory == null) continue;
+                
                 factoryData = transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
                 factory.Init(factoryData, dropItemsContainer.DropFromSenderToPlayer);
             }
@@ -52,7 +53,6 @@ namespace World
     
         private void SpawnPlayer()
         {
-            var playerPrefab = Resources.Load<Player>(PlayerPrefabPath);
             CurrentPlayer = Instantiate(playerPrefab, playerSpawnPoint.position, Quaternion.identity, transform);
             CurrentPlayer.Init(_transactions, _miningController.OnStartMining, _dropItemsContainer.DropToFactory, _transactions.FactoriesConfig.DropToFactoryPeriod);
         }
