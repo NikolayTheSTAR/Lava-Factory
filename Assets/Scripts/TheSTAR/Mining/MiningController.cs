@@ -53,11 +53,6 @@ namespace Mining
             return loadedItem;
         }
 
-        public void OnStartMining(SourceType sourceType, out SourceMiningData miningData)
-        {
-            miningData = SourcesConfig.SourceDatas[(int)sourceType].MiningData;
-        }
-
         public void StartSourceRecovery(ResourceSource source)
         {
             var recoveryDateTime = 
