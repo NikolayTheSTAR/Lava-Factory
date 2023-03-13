@@ -1,6 +1,5 @@
 using System;
 using Mining;
-using Sirenix.OdinInspector;
 using TheSTAR.Data;
 using TheSTAR.GUI;
 using TheSTAR.GUI.Screens;
@@ -52,6 +51,6 @@ public class GameController : MonoBehaviour
         input.Init(gameScreen.JoystickContainer, world.CurrentPlayer);
         transactions.Init(trs, data);
         drop.Init(transactions, mining, world.CurrentPlayer, world.CurrentPlayer.StopCraft);
-        tutorial.Init(this, data, world.CurrentPlayer);
+        tutorial.Init(this, data, world.CurrentPlayer, transactions);
     }
 }

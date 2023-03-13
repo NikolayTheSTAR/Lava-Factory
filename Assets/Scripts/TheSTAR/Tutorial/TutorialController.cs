@@ -20,14 +20,17 @@ namespace Tutorial
         private TutorialData _currentTutorial;
         private bool _inProcess = false;
         private DataController _data;
+        private TransactionsController _transactons;
 
-        public void Init(GameController gameController, DataController data, Player p)
+        public void Init(GameController gameController, DataController data, Player p, TransactionsController transactions)
         {
             if (!useTutorial) return;
             
             _data = data;
             _player = p;
-            
+            _transactons = transactions;
+
+
             for (int i = 0; i < tutorialDatas.Length; i++)
             {
                 var tutorialData = tutorialDatas[i];
@@ -51,6 +54,31 @@ namespace Tutorial
 
                         break;
                     }
+
+                    case TutorialShowCondition.ByFarmToNeededCount:
+                    {
+                        Action unsubscribe = null;
+                        unsubscribe = () => tutorialData.FarmSource.OnCompleteFarmEvent -= TryStartTutorialAction;
+                        tutorialData.FarmSource.OnCompleteFarmEvent += TryStartTutorialAction;
+
+                        void TryStartTutorialAction()
+                        {
+                            bool needShowTutor = false;
+                            var itemType = tutorialData.FarmSource.SourceData.DropItemType;
+                            int currentFarmCount = _data.gameData.GetItemCount(itemType);
+                            int neededFarmCount = _transactons.FactoriesConfig.GetFactoryDataByNeededItemType(itemType).NeededFromItemCount;
+
+                            needShowTutor = currentFarmCount >= neededFarmCount;
+
+                            if (needShowTutor)
+                            {
+                                StartTutorial(tutorialData);
+                                unsubscribe?.Invoke();
+                            }
+                        }
+                        break;
+                    }
+                        
                 }
             }
         }
@@ -98,7 +126,7 @@ namespace Tutorial
         [SerializeField] private CiObject goalObject;
         [SerializeField] private TutorialShowCondition condition;
 
-        [ShowIf("@condition == TutorialShowCondition.ByFarm")] [SerializeField]
+        [ShowIf("@condition == TutorialShowCondition.ByFarm || condition == TutorialShowCondition.ByFarmToNeededCount")] [SerializeField]
         private ResourceSource farmSource;
         
         public CiObject GoalObject => goalObject;
@@ -111,6 +139,7 @@ namespace Tutorial
     {
         Never,
         ByStart,
-        ByFarm
+        ByFarm,
+        ByFarmToNeededCount
     }
 }

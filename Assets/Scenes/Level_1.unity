@@ -2117,7 +2117,7 @@ MonoBehaviour:
     farmSource: {fileID: 0}
   - id: spot
     goalObject: {fileID: 1559232403}
-    condition: 2
+    condition: 3
     farmSource: {fileID: 3422493302250450488}
   arrow: {fileID: 267247182}
 --- !u!1 &372068103

@@ -16,7 +16,8 @@ namespace Configs
         public float DropToFactoryPeriod => dropToFactoryPeriod;
         public float RandomOffsetRange => randomOffsetRange;
         public float DropWaitAfterCreateTime => dropWaitAfterCreateTime;
-        
+
+        public FactoryData GetFactoryDataByNeededItemType(ItemType fromItemType) => Array.Find(factoryDatas, info => info.FromItemType == fromItemType);
     }
 
     [Serializable]
