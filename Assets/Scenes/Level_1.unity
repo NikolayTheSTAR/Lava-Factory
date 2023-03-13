@@ -940,9 +940,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38c7fbe1e766544cbab18898ce541c3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameData:
-    itemCounts: []
-    completedTutorials: []
   clearData: 0
 --- !u!1001 &154383504
 PrefabInstance:

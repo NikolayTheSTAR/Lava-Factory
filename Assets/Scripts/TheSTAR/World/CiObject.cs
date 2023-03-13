@@ -1,8 +1,9 @@
 using System;
+using UnityEngine;
 
 namespace World
 {
-    public abstract class GameWorldCiObject : GameWorldObject, ICollisionInteractable
+    public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
         public event Action OnEnterEvent;
         

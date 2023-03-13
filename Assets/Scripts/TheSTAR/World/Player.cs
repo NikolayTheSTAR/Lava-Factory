@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using World;
 
-public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, IDropReceiver
+public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
@@ -75,6 +75,12 @@ public class Player : GameWorldObject, ICameraFocusable, IJoystickControlled, ID
             if (!_isMoving) OnStartMove();
 
             OnMove();
+
+            // rotate
+
+            var lookRotation = Quaternion.LookRotation(tempMoveDirection);
+            var euler = lookRotation.eulerAngles;
+            visualTran.rotation = Quaternion.Euler(0, euler.y, 0);
         }
         else
         {

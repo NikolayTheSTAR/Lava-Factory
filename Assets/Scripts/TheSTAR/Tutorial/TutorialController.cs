@@ -95,13 +95,13 @@ namespace Tutorial
     public class TutorialData
     {
         [SerializeField] private string id;
-        [SerializeField] private GameWorldCiObject goalObject;
+        [SerializeField] private CiObject goalObject;
         [SerializeField] private TutorialShowCondition condition;
 
         [ShowIf("@condition == TutorialShowCondition.ByFarm")] [SerializeField]
         private ResourceSource farmSource;
         
-        public GameWorldCiObject GoalObject => goalObject;
+        public CiObject GoalObject => goalObject;
         public TutorialShowCondition Condition => condition;
         public ResourceSource FarmSource => farmSource;
         public string ID => id;

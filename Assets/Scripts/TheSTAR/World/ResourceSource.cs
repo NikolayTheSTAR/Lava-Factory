@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 namespace World
 {
     [Serializable]
-    public class ResourceSource : GameWorldCiObject, IDropSender
+    public class ResourceSource : CiObject, IDropSender
     {
         [SerializeField] private SourceType sourceType;
         [SerializeField] private GameObject prolificVisual;

@@ -1,19 +1,18 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using World;
+using Newtonsoft;
+using Newtonsoft.Json;
 
 namespace TheSTAR.Data
 {
     public sealed class DataController : MonoBehaviour
     {
         private const string GameDataFileName = "game_data.json";
-        private string ProfileDataFileName(int profileIndex)
-        {
-            return $"profile_{profileIndex.ToString()}.json";
-        }
-
+        
         public GameData gameData = new();
 
         [SerializeField] private bool clearData = false;
@@ -29,18 +28,13 @@ namespace TheSTAR.Data
         #endregion
 
         private string GameDataPath => Path.Combine(Application.persistentDataPath, GameDataFileName);
-        public string ProfileDataPath(int profileIndex)
-        {
-            string value = Path.Combine(Application.persistentDataPath, ProfileDataFileName(profileIndex));
-            return value;
-        }
         
         [ContextMenu("Save")]
         public void Save()
         {
-            SerializationToJson(out GameData newData);
-
-            string jsonString = JsonUtility.ToJson(newData, true);
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Objects;
+            string jsonString = JsonConvert.SerializeObject(gameData, Formatting.Indented, settings);
             File.WriteAllText(GameDataPath, jsonString);
         }
 
@@ -50,8 +44,7 @@ namespace TheSTAR.Data
             if (File.Exists(GameDataPath))
             {
                 string jsonString = File.ReadAllText(GameDataPath);
-                GameData newData = JsonUtility.FromJson<GameData>(jsonString);
-                DeserializationFromJson(newData);
+                gameData = JsonConvert.DeserializeObject<GameData>(jsonString, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
             }
             else LoadDefault();
         }
@@ -63,53 +56,39 @@ namespace TheSTAR.Data
             Save();
         }
 
-        // Запись данных
-        private void SerializationToJson(out GameData newGameData)
-        {
-            newGameData = gameData;
-        }
-
-        // Чтение данных
-        private void DeserializationFromJson(GameData fileGameData)
-        {
-            gameData = fileGameData;
-        }
-
         [Serializable]
         public class GameData
         {
-            public List<ItemCountData> itemCounts = new List<ItemCountData>();
-            public List<string> completedTutorials = new List<string>();
+            public Dictionary<ItemType, int> items = new Dictionary<ItemType, int>();
+            public Dictionary<string, bool> completedTutorials = new Dictionary<string, bool>();
 
             public void AddItems(ItemType itemType, int count, out int result)
             {
-                var itemCountData = itemCounts.Find(info => info.ItemType == itemType);
-                if (itemCountData == null)
-                {
-                    itemCountData = new ItemCountData(itemType, count);
-                    itemCounts.Add(itemCountData);
-                }
-                else itemCountData.Count += count;
-                
-                result = itemCountData.Count;
+                if (items.ContainsKey(itemType)) items[itemType] = (int)items[itemType] + count;
+                else items.Add(itemType, count);
+
+                result = (int)items[itemType];
             }
 
             public int GetItemCount(ItemType itemType)
             {
-                var itemCountData = itemCounts.Find(info => info.ItemType == itemType);
-                if (itemCountData != null) return itemCountData.Count;
-                itemCountData = new ItemCountData(itemType, 0);
-                itemCounts.Add(itemCountData);
-
-                return itemCountData.Count;
+                if (items.ContainsKey(itemType)) return (int)items[itemType];
+                else return 0;
             }
 
             public void CompleteTutorial(string id)
             {
-                if (!IsTutorialComplete(id)) completedTutorials.Add(id);
+                if (!IsTutorialComplete(id)) completedTutorials.Add(id, true);
             }
 
-            public bool IsTutorialComplete(string id) => completedTutorials.Contains(id);
+            public bool IsTutorialComplete(string id)
+            {
+                bool contains = completedTutorials.ContainsKey(id);
+
+                if (contains) return completedTutorials[id];
+
+                return false;
+            }
         }
 
         [Serializable]

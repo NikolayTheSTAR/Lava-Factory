@@ -9,7 +9,7 @@ using Tutorial;
 namespace World
 {
     [Serializable]
-    public class Factory : GameWorldCiObject, IDropReceiver, IDropSender
+    public class Factory : CiObject, IDropReceiver, IDropSender
     {
         [SerializeField] private FactoryType factoryType;
 
