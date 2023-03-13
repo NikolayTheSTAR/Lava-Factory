@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace World
 {
+    [Obsolete]
     public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
         public event Action OnEnterEvent;

@@ -87,7 +87,7 @@ namespace Mining
             var fromItemType = factoryData.FromItemType;
             var toItemType = factoryData.ToItemType;
             
-            _transactions.ReduceItem(fromItemType, 1, false, 
+            _transactions.ReduceItem(fromItemType, 1, true, 
                 () => DropItemTo(fromItemType, _playerDropReceiver.transform.position + CreateItemPosOffset, factory), 
                 () => _onFailDropToFactoryAction());
         }

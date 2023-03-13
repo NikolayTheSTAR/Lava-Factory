@@ -32,8 +32,7 @@ namespace TheSTAR.Data
         [ContextMenu("Save")]
         public void Save()
         {
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Objects;
+            JsonSerializerSettings settings = new() { TypeNameHandling = TypeNameHandling.Objects };
             string jsonString = JsonConvert.SerializeObject(gameData, Formatting.Indented, settings);
             File.WriteAllText(GameDataPath, jsonString);
         }
@@ -59,12 +58,13 @@ namespace TheSTAR.Data
         [Serializable]
         public class GameData
         {
-            public Dictionary<ItemType, int> items = new Dictionary<ItemType, int>();
-            public Dictionary<string, bool> completedTutorials = new Dictionary<string, bool>();
+            public Dictionary<ItemType, int> items = new();
+            public Dictionary<string, bool> completedTutorials = new();
+            public Dictionary<int, int> factoriesStorageData = new();
 
             public void AddItems(ItemType itemType, int count, out int result)
             {
-                if (items.ContainsKey(itemType)) items[itemType] = (int)items[itemType] + count;
+                if (items.ContainsKey(itemType)) items[itemType] += count;
                 else items.Add(itemType, count);
 
                 result = (int)items[itemType];
@@ -72,7 +72,7 @@ namespace TheSTAR.Data
 
             public int GetItemCount(ItemType itemType)
             {
-                if (items.ContainsKey(itemType)) return (int)items[itemType];
+                if (items.ContainsKey(itemType)) return items[itemType];
                 else return 0;
             }
 
@@ -88,6 +88,26 @@ namespace TheSTAR.Data
                 if (contains) return completedTutorials[id];
 
                 return false;
+            }
+
+            public void AddItemToFactoryStorage(int factoryIndex, int value)
+            {
+                if (factoriesStorageData.ContainsKey(factoryIndex)) factoriesStorageData[factoryIndex] += value;
+                else factoriesStorageData.Add(factoryIndex, value);
+            }
+
+            public void EmptyFactoryStorage(int factoryIndex) => SetItemToFactoryStorage(factoryIndex, 0);
+
+            public void SetItemToFactoryStorage(int factoryIndex, int value)
+            {
+                if (factoriesStorageData.ContainsKey(factoryIndex)) factoriesStorageData[factoryIndex] = value;
+                else factoriesStorageData.Add(factoryIndex, value);
+            }
+
+            public int GetFactoryStorageValue(int factoryIndex)
+            {
+                if (factoriesStorageData.ContainsKey(factoryIndex)) return factoriesStorageData[factoryIndex];
+                else return 0;
             }
         }
 

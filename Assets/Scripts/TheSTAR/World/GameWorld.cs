@@ -3,6 +3,7 @@ using System.Linq;
 using Configs;
 using Mining;
 using UnityEngine;
+using TheSTAR.Data;
 
 namespace World
 {
@@ -19,13 +20,13 @@ namespace World
         private DropItemsContainer _dropItemsContainer;
         private TransactionsController _transactions;
 
-        public void Init(DropItemsContainer dropItemsContainer, MiningController miningController, TransactionsController transactions)
+        public void Init(DropItemsContainer dropItemsContainer, MiningController miningController, TransactionsController transactions, DataController data)
         {
             _miningController = miningController;
             _dropItemsContainer = dropItemsContainer;
             _transactions = transactions;
             
-            if (CurrentPlayer != null) Destroy(CurrentPlayer);
+            if (CurrentPlayer != null) Destroy(CurrentPlayer.gameObject);
             SpawnPlayer();
 
             SourceType sourceType;
@@ -42,12 +43,28 @@ namespace World
             }
 
             FactoryData factoryData = null;
-            foreach (var factory in factories)
+            Factory factory;
+
+            for (int i = 0; i < factories.Length; i++)
             {
+                factory = factories[i];
+
                 if (factory == null) continue;
                 
                 factoryData = transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
-                factory.Init(factoryData, dropItemsContainer.DropFromSenderToPlayer);
+                factory.Init(i, factoryData, dropItemsContainer.DropFromSenderToPlayer, data.gameData.GetFactoryStorageValue(i));
+
+                factory.OnAddItemToStorageEvent += (index, value) =>
+                {
+                    data.gameData.AddItemToFactoryStorage(index, value);
+                    data.Save();
+                };
+
+                factory.OnEmptyStorageEvent += (index) =>
+                {
+                    data.gameData.EmptyFactoryStorage(index);
+                    data.Save();
+                };
             }
         }
     

@@ -17,6 +17,7 @@ namespace World
         public override CiCondition Condition => CiCondition.PlayerIsStopped;
         public FactoryType FactoryType => factoryType;
 
+        private int _index;
         private FactoryData _factoryData;
         private int _itemsInStorageCount = 0;
         private int _itemsOnWayCount = 0;
@@ -26,10 +27,15 @@ namespace World
         
         private Action<IDropSender, ItemType> _dropItemAction;
 
-        public void Init(FactoryData factoryData, Action<IDropSender, ItemType> dropItemAction)
+        public event Action<int, int> OnAddItemToStorageEvent;
+        public event Action<int> OnEmptyStorageEvent;
+
+        public void Init(int index, FactoryData factoryData, Action<IDropSender, ItemType> dropItemAction, int itemsInStorageCount)
         {
+            _index = index;
             _factoryData = factoryData;
             _dropItemAction = dropItemAction;
+            _itemsInStorageCount = itemsInStorageCount;
         }
         
         public override void Interact(Player p)
@@ -45,9 +51,15 @@ namespace World
         private void AddNeededResource()
         {
             _itemsInStorageCount++;
-            if (_itemsInStorageCount < _factoryData.NeededFromItemCount) return;
+
+            if (_itemsInStorageCount < _factoryData.NeededFromItemCount)
+            {
+                OnAddItemToStorageEvent?.Invoke(_index, 1);
+                return;
+            }
             
-            _itemsInStorageCount -= _factoryData.NeededFromItemCount;
+            _itemsInStorageCount = 0;
+            OnEmptyStorageEvent?.Invoke(_index);
             _isSending = true;
             
             // wait for craft

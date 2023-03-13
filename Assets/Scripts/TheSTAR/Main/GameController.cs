@@ -42,7 +42,7 @@ public class GameController : MonoBehaviour
     private void Init()
     {
         mining.Init();
-        world.Init(drop, mining, transactions);
+        world.Init(drop, mining, transactions, data);
         cameraController.FocusTo(world.CurrentPlayer);
         
         gui.Init(out var trs);

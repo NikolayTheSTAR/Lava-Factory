@@ -38,7 +38,7 @@ public class TransactionsController : MonoBehaviour
         Reaction(itemType, result);
     }
     
-    public void ReduceItem(ItemType itemType, int count = 1, bool autoSave = false, Action completeAction = null, Action failAction = null)
+    public void ReduceItem(ItemType itemType, int count = 1, bool autoSave = true, Action completeAction = null, Action failAction = null)
     {
         if (_data.gameData.GetItemCount(itemType) >= count)
         {
