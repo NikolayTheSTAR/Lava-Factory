@@ -8,23 +8,20 @@ using UnityEngine;
 using UnityEngine.AI;
 using World;
 
-public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver, ICIProvocateur
+public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
 {
     [SerializeField] private NavMeshAgent meshAgent;
-    [SerializeField] private EntranceTrigger trigger;
     [SerializeField] private Transform visualTran;
+
+    [Header("Modules")]
     [SerializeField] private Miner miner;
     [SerializeField] private Crafter crafter;
+    [SerializeField] private CIProvocateur ciProvocateur;
     
     private bool _isMoving = false;
-
     private TransactionsController _transactions;
-    private List<ICollisionInteractable> _currentCIs;
-    private ICollisionInteractable _currentCI;
-
     public event Action OnMoveEvent;
 
-    
     private const string CharacterConfigPath = "Configs/CharacterConfig";
     
     private CharacterConfig _characterConfig;
@@ -38,19 +35,22 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         }
     }
 
+    public bool IsMoving => _isMoving;
+    public Miner Miner => miner;
+    public Crafter Crafter => crafter;
+
     public void Init(TransactionsController transactions, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
         _transactions = transactions;
-        trigger.Init(OnEnter, OnExit);        
-        trigger.SetRadius(CharacterConfig.TriggerRadius);
-
-        _currentCIs = new List<ICollisionInteractable>();
+        
 
         miner.Init(visualTran);
-        miner.OnStopMiningEvent += RetryInteract;
+        miner.OnStopMiningEvent += ciProvocateur.RetryInteract;
 
         crafter.Init(dropToFactoryPeriod, dropToFactoryAction);
-        crafter.OnStopCraftEvent += RetryInteract;
+        crafter.OnStopCraftEvent += ciProvocateur.RetryInteract;
+
+        ciProvocateur.Init(this, transactions, CharacterConfig.TriggerRadius);
     }
 
     #region Logic Enter
@@ -84,36 +84,14 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         meshAgent.SetDestination(finalMoveDirection);
     }
 
-    private void OnEnter(Collider other)
-    {
-        var ci = other.GetComponent<ICollisionInteractable>();
-        if (ci == null) return;
-        
-        ci.OnEnter();
-
-        _currentCIs.Add(ci);
-        
-        if (!ci.CanInteract) return;
-        if (!ci.CompareTag("Factory")) StartInteract(ci);
-    }
-
-    private void OnExit(Collider other)
-    {
-        var ci = other.GetComponent<ICollisionInteractable>();
-        if (ci == null) return;
-        if (_currentCIs.Contains(ci)) _currentCIs.Remove(ci);
-        
-        StopInteract(ci);
-    }
-
     private void OnStartMove()
     {
         _isMoving = true;
 
-        foreach (var ci in _currentCIs)
+        foreach (var ci in ciProvocateur.CurrentCIs)
         {
             if (ci == null || !ci.CanInteract) return;
-            if (ci.CompareTag("Factory")) StopInteract(ci);   
+            if (ci.CompareTag("Factory")) ciProvocateur.StopInteract(ci);   
         }
     }
     
@@ -123,12 +101,12 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     {
         _isMoving = false;
 
-        foreach (var ci in _currentCIs)
+        foreach (var ci in ciProvocateur.CurrentCIs)
         {
             if (ci == null || !ci.CanInteract) continue;
             if (!ci.CompareTag("Factory")) continue;
 
-            StartInteract(ci);
+            ciProvocateur.StartInteract(ci);
 
             return;
         }
@@ -136,45 +114,15 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     #endregion
 
-    #region CI Provocateur
-
-    public void StartInteract(ICollisionInteractable ci)
-    {
-        _currentCI = ci;
-        if (ci.CompareTag("Source")) miner.StartMining(ci.Col.GetComponent<ResourceSource>());
-        else if (ci.CompareTag("Factory")) crafter.StartCraft(ci.Col.GetComponent<Factory>());
-    }
-
     public void StopInteract()
     {
-        if (_currentCI == null) return;
-        StopInteract(_currentCI);
-    }
-
-    public void StopInteract(ICollisionInteractable ci)
-    {
-        if (ci.CompareTag("Source")) miner.StopMining(ci.Col.GetComponent<ResourceSource>());
-        else if (ci.CompareTag("Factory")) crafter.StopCraft();
+        ciProvocateur.StopInteract();
     }
 
     public void RetryInteract()
     {
-        foreach (var ci in _currentCIs)
-        {
-            if (ci == null || !ci.CanInteract) continue;
-
-            // conditions
-            if (ci.CompareTag("Factory") && _isMoving) continue;
-
-            // check for Factory
-            if (ci is Factory f && !_transactions.CanStartTransaction(f)) continue;
-
-            StartInteract(ci);
-            return;
-        }
+        ciProvocateur.RetryInteract();
     }
-
-    #endregion
 
     public void OnStartReceiving() {}
 

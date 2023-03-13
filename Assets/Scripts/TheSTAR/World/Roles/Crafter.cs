@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace World
 {
-    public class Crafter : MonoBehaviour
+    public class Crafter : Role
     {
         private float _dropToFactoryPeriod = 1;
         private bool _crafting = false;

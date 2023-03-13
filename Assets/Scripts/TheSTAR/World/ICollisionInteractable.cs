@@ -6,7 +6,7 @@ namespace World
     // объекты, с которыми возможно коллизионное взаимодействие
     public interface ICollisionInteractable
     {
-        [Obsolete] bool CompareTag(string tag);
+        [Obsolete] bool CompareTag(string tag); // из за существования этого метода повсеместно возникает проверка на тег, что являеся тяжеловатым, нужно придумать как отойти
         Collider Col { get; }
         bool CanInteract { get; }
         void OnEnter();

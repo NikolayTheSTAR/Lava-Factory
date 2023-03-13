@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace World
 {
-    [Obsolete]
     public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
         bool ICollisionInteractable.CompareTag(string value) => CompareTag(value);
