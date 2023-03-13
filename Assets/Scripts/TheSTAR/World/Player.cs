@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using World;
 
-public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver
+public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDropReceiver, ICIProvocateur
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
@@ -98,20 +98,20 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         if (ci == null) return;
         
         ci.OnEnter();
-        
+
         _currentCIs.Add(ci);
         
         if (!ci.CanInteract) return;
-        if (ci.Condition == CiCondition.None) ci.Interact(this);
+        if (!ci.CompareTag("Factory")) StartInteract(ci);
     }
-    
+
     private void OnExit(Collider other)
     {
         var ci = other.GetComponent<ICollisionInteractable>();
         if (ci == null) return;
         if (_currentCIs.Contains(ci)) _currentCIs.Remove(ci);
         
-        ci.StopInteract(this);
+        StopInteract(ci);
     }
 
     private void OnStartMove()
@@ -121,7 +121,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         foreach (var ci in _currentCIs)
         {
             if (ci == null || !ci.CanInteract) return;
-            if (ci.Condition == CiCondition.PlayerIsStopped) ci.StopInteract(this);   
+            if (ci.CompareTag("Factory")) StopInteract(ci);   
         }
     }
     
@@ -134,32 +134,49 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
         foreach (var ci in _currentCIs)
         {
             if (ci == null || !ci.CanInteract) continue;
-            if (ci.Condition != CiCondition.PlayerIsStopped) continue;
-            ci.Interact(this);
+            if (!ci.CompareTag("Factory")) continue;
+
+            StartInteract(ci);
 
             return;
         }
     }
-    
+
     #endregion
-    
+
+    #region CI Provocateur
+
+    public void StartInteract(ICollisionInteractable ci)
+    {
+        if (ci.CompareTag("Source")) StartMining(ci.Col.GetComponent<ResourceSource>());
+        else if (ci.CompareTag("Factory")) StartCraft(ci.Col.GetComponent<Factory>());
+    }
+
+    public void StopInteract(ICollisionInteractable ci)
+    {
+        if (ci.CompareTag("Source")) StopMining(ci.Col.GetComponent<ResourceSource>());
+        else if (ci.CompareTag("Factory")) StopCraft();
+    }
+
     public void RetryInteract()
     {
         foreach (var ci in _currentCIs)
         {
             if (ci == null || !ci.CanInteract) continue;
-            
+
             // conditions
-            if (ci.Condition == CiCondition.PlayerIsStopped && _isMoving) continue;
-            
+            if (ci.CompareTag("Factory") && _isMoving) continue;
+
             // check for Factory
             if (ci is Factory f && !_transactions.CanStartTransaction(f)) continue;
-            
-            ci.Interact(this);
+
+            StartInteract(ci);
             return;
         }
     }
-    
+
+    #endregion
+
     #region Mining
 
     public void StartMining(ResourceSource source)

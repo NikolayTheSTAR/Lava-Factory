@@ -11,10 +11,12 @@ namespace World
     [Serializable]
     public class Factory : CiObject, IDropReceiver, IDropSender
     {
+        [SerializeField] private Collider ciCollider;
         [SerializeField] private FactoryType factoryType;
 
         public override bool CanInteract => !_isSending && (_itemsInStorageCount + _itemsOnWayCount) < _factoryData.NeededFromItemCount;
-        public override CiCondition Condition => CiCondition.PlayerIsStopped;
+        public override Collider Col => ciCollider;
+
         public FactoryType FactoryType => factoryType;
 
         private int _index;
@@ -36,16 +38,6 @@ namespace World
             _factoryData = factoryData;
             _dropItemAction = dropItemAction;
             _itemsInStorageCount = itemsInStorageCount;
-        }
-        
-        public override void Interact(Player p)
-        {
-            p.StartCraft(this);
-        }
-
-        public override void StopInteract(Player p)
-        {
-            p.StopCraft();
         }
 
         private void AddNeededResource()

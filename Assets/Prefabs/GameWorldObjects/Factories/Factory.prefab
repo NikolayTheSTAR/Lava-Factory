@@ -226,6 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56c1d1b6b96d04fbb873192dded3332e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ciCollider: {fileID: 5793128464235999338}
   factoryType: 0
 --- !u!135 &5793128464235999338
 SphereCollider:

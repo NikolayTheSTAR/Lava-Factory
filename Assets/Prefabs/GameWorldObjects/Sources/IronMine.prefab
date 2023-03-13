@@ -586,6 +586,7 @@ MonoBehaviour:
   sourceType: 1
   prolificVisual: {fileID: 3589577471133777457}
   emptyVisual: {fileID: 3589577472254410681}
+  ciCollider: {fileID: 3589577471197030359}
 --- !u!135 &3589577471197030359
 SphereCollider:
   m_ObjectHideFlags: 0

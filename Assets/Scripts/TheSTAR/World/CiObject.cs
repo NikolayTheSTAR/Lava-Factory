@@ -6,13 +6,12 @@ namespace World
     [Obsolete]
     public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
-        public event Action OnEnterEvent;
-        
-        public abstract bool CanInteract { get; }
-        public abstract CiCondition Condition { get; }
-        public abstract void Interact(Player p);
-        public abstract void StopInteract(Player p);
+        bool ICollisionInteractable.CompareTag(string value) => CompareTag(value);
 
+        public event Action OnEnterEvent;
         public void OnEnter() => OnEnterEvent?.Invoke();
+
+        public abstract Collider Col { get; }
+        public abstract bool CanInteract { get; }
     }
 }

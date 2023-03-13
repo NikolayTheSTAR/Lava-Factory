@@ -1,23 +1,22 @@
 using System;
+using UnityEngine;
 
 namespace World
 {
+    // объекты, с которыми возможно коллизионное взаимодействие
     public interface ICollisionInteractable
     {
+        bool CompareTag(string tag);
+        Collider Col { get; }
         bool CanInteract { get; }
-        
-        CiCondition Condition { get; }
-
-        void Interact(Player p);
-
-        void StopInteract(Player p);
-
         void OnEnter();
     }
 
-    public enum CiCondition
+    // объект, провоцирующий коллизионное взаимодействие
+    public interface ICIProvocateur
     {
-        None,
-        PlayerIsStopped
+        void StartInteract(ICollisionInteractable ci);
+        void StopInteract(ICollisionInteractable ci);
+        void RetryInteract();
     }
 }

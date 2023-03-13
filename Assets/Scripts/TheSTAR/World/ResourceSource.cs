@@ -12,6 +12,7 @@ namespace World
         [SerializeField] private SourceType sourceType;
         [SerializeField] private GameObject prolificVisual;
         [SerializeField] private GameObject emptyVisual;
+        [SerializeField] private Collider ciCollider;
 
         private int _animLTID = -1;
         private Action<IDropSender, ItemType> _dropItemAction;
@@ -22,8 +23,8 @@ namespace World
         
         public event Action OnCompleteFarmEvent;
 
+        public override Collider Col => ciCollider;
         public override bool CanInteract => !IsEmpty;
-        public override CiCondition Condition => CiCondition.None;
         public bool IsEmpty { get; private set; }
 
         public SourceType SourceType => sourceType;
@@ -92,16 +93,6 @@ namespace World
                     _animLTID =
                         LeanTween.scaleY(gameObject, 1f, 0.2f).id;
                 }).id;
-        }
-
-        public override void Interact(Player p)
-        {
-            p.StartMining(this);
-        }
-
-        public override void StopInteract(Player p)
-        {
-            p.StopMining(this);
         }
         
         public void OnCompleteDrop()
