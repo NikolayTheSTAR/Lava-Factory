@@ -6,7 +6,7 @@ namespace World
     // объекты, с которыми возможно коллизионное взаимодействие
     public interface ICollisionInteractable
     {
-        bool CompareTag(string tag);
+        [Obsolete] bool CompareTag(string tag);
         Collider Col { get; }
         bool CanInteract { get; }
         void OnEnter();
@@ -16,6 +16,7 @@ namespace World
     public interface ICIProvocateur
     {
         void StartInteract(ICollisionInteractable ci);
+        void StopInteract();
         void StopInteract(ICollisionInteractable ci);
         void RetryInteract();
     }

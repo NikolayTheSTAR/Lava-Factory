@@ -13,29 +13,18 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private EntranceTrigger trigger;
     [SerializeField] private Transform visualTran;
-
-    private float 
-        _mineStrikePeriod = 1,
-        _dropToFactoryPeriod = 1;
+    [SerializeField] private Miner miner;
+    [SerializeField] private Crafter crafter;
     
-    private bool 
-        _isMoving = false, 
-        _isMining = false, 
-        _isTransaction = false;
+    private bool _isMoving = false;
 
     private TransactionsController _transactions;
     private List<ICollisionInteractable> _currentCIs;
-    private ResourceSource _currentSource;
-    private Factory _currentFactory;
-    private Coroutine _mineCoroutine;
-    private Coroutine _transactionCoroutine;
-    private int _animLTID = -1;
+    private ICollisionInteractable _currentCI;
 
-    private Action<Factory> _dropToFactoryAction;
-    
     public event Action OnMoveEvent;
 
-    private const float DefaultMineStrikeTime = 0.5f;
+    
     private const string CharacterConfigPath = "Configs/CharacterConfig";
     
     private CharacterConfig _characterConfig;
@@ -52,13 +41,16 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     public void Init(TransactionsController transactions, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
         _transactions = transactions;
-        trigger.Init(OnEnter, OnExit);
-        _dropToFactoryAction = dropToFactoryAction;
-        _dropToFactoryPeriod = dropToFactoryPeriod;
-        
+        trigger.Init(OnEnter, OnExit);        
         trigger.SetRadius(CharacterConfig.TriggerRadius);
 
         _currentCIs = new List<ICollisionInteractable>();
+
+        miner.Init(visualTran);
+        miner.OnStopMiningEvent += RetryInteract;
+
+        crafter.Init(dropToFactoryPeriod, dropToFactoryAction);
+        crafter.OnStopCraftEvent += RetryInteract;
     }
 
     #region Logic Enter
@@ -148,14 +140,21 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     public void StartInteract(ICollisionInteractable ci)
     {
-        if (ci.CompareTag("Source")) StartMining(ci.Col.GetComponent<ResourceSource>());
-        else if (ci.CompareTag("Factory")) StartCraft(ci.Col.GetComponent<Factory>());
+        _currentCI = ci;
+        if (ci.CompareTag("Source")) miner.StartMining(ci.Col.GetComponent<ResourceSource>());
+        else if (ci.CompareTag("Factory")) crafter.StartCraft(ci.Col.GetComponent<Factory>());
+    }
+
+    public void StopInteract()
+    {
+        if (_currentCI == null) return;
+        StopInteract(_currentCI);
     }
 
     public void StopInteract(ICollisionInteractable ci)
     {
-        if (ci.CompareTag("Source")) StopMining(ci.Col.GetComponent<ResourceSource>());
-        else if (ci.CompareTag("Factory")) StopCraft();
+        if (ci.CompareTag("Source")) miner.StopMining(ci.Col.GetComponent<ResourceSource>());
+        else if (ci.CompareTag("Factory")) crafter.StopCraft();
     }
 
     public void RetryInteract()
@@ -173,100 +172,6 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             StartInteract(ci);
             return;
         }
-    }
-
-    #endregion
-
-    #region Mining
-
-    public void StartMining(ResourceSource source)
-    {
-        BreakAnim();
-        _currentSource = source;
-        var miningData = source.SourceData.MiningData;
-        _mineStrikePeriod = miningData.MiningPeriod;
-        
-        _isMining = true;
-        
-        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
-        _mineCoroutine = StartCoroutine(MiningCor());
-    }
-        
-    public void StopMining(ResourceSource rs)
-    {
-        if (_currentSource != rs) return;
-            
-        _currentSource = null;
-        _isMining = false;
-        BreakAnim();
-        
-        if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
-        
-        RetryInteract();
-    }
-
-    private IEnumerator MiningCor()
-    {
-        while (_isMining)
-        {
-            DoMineStrike();
-            yield return new WaitForSeconds(_mineStrikePeriod);
-        }
-        yield return null;
-    }
-
-    private void DoMineStrike()
-    {
-        BreakAnim();
-
-        var animTimeMultiply = _mineStrikePeriod > DefaultMineStrikeTime ? 1 : (_mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
-        
-        _animLTID =
-            LeanTween.scaleY(visualTran.gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
-            {
-                _animLTID =
-                    LeanTween.scaleY(visualTran.gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
-            }).id;
-    }
-    
-    private void BreakAnim()
-    {
-        if (_animLTID == -1) return;
-        LeanTween.cancel(_animLTID);
-        visualTran.localScale = Vector3.one;
-        _animLTID = -1;
-    }
-    
-    #endregion
-
-    #region Craft
-
-    public void StartCraft(Factory factory)
-    {
-        _isTransaction = true;
-        _currentFactory = factory;
-        
-        if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
-        _transactionCoroutine = StartCoroutine(CraftCor());
-    }
-    
-    public void StopCraft()
-    {
-        _isTransaction = false;
-        if (_transactionCoroutine != null) StopCoroutine(_transactionCoroutine);
-        _currentFactory = null;
-        
-        RetryInteract();
-    }
-    
-    private IEnumerator CraftCor()
-    {
-        while (_isTransaction)
-        {
-            if (_currentFactory.CanInteract) _dropToFactoryAction(_currentFactory);
-            yield return new WaitForSeconds(_dropToFactoryPeriod);
-        }
-        yield return null;
     }
 
     #endregion

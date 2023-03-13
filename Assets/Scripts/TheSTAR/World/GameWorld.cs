@@ -37,7 +37,7 @@ namespace World
                 sourceData = _miningController.SourcesConfig.SourceDatas[(int)sourceType];
                 source.Init(sourceData, dropItemsContainer.DropFromSenderToPlayer, (s) =>
                 {
-                    CurrentPlayer.StopMining(s);
+                    CurrentPlayer.StopInteract(s);
                     _miningController.StartSourceRecovery(s);
                 }, () => CurrentPlayer.RetryInteract());
             }
