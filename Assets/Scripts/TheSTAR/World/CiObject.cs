@@ -5,8 +5,6 @@ namespace World
 {
     public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
-        [Obsolete] bool ICollisionInteractable.CompareTag(string value) => CompareTag(value);
-
         public event Action OnEnterEvent;
         public void OnEnter() => OnEnterEvent?.Invoke();
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System;
 using UnityEngine;
 
@@ -10,15 +11,33 @@ namespace World
         private bool _crafting = false;
 
         private Factory _currentFactory;
+        private List<Factory> _availableFactories;
         private Coroutine _craftCoroutine;
+        private TransactionsController _transactions;
 
         private Action<Factory> _dropToFactoryAction;
         public event Action OnStopCraftEvent;
 
-        public void Init(float dropToFactoryPeriod, Action<Factory> dropToFactoryAction)
+        public Factory CurrentFactory => _currentFactory;
+
+        public void Init(TransactionsController transactions, float dropToFactoryPeriod, Action<Factory> dropToFactoryAction)
         {
+            _transactions = transactions;
             _dropToFactoryPeriod = dropToFactoryPeriod;
             _dropToFactoryAction = dropToFactoryAction;
+            _availableFactories = new ();
+        }
+
+        public void AddAvailableFactory(Factory factory)
+        {
+            if (_availableFactories.Contains(factory)) return;
+            _availableFactories.Add(factory);
+        }
+
+        public void RemoveAvailableFactory(Factory factory)
+        {
+            if (!_availableFactories.Contains(factory)) return;
+            _availableFactories.Remove(factory);
         }
 
         public void StartCraft(Factory factory)
@@ -47,6 +66,19 @@ namespace World
                 yield return new WaitForSeconds(_dropToFactoryPeriod);
             }
             yield return null;
+        }
+
+        public void RetryInteract(out bool successful)
+        {
+            foreach (var f in _availableFactories)
+            {
+                if (f == null || !f.CanInteract || !_transactions.CanStartTransaction(f)) continue;
+                StartCraft(f);
+                successful = true;
+                return;
+            }
+
+            successful = false;
         }
     }
 }
