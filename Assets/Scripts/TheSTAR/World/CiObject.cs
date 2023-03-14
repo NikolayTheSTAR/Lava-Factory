@@ -5,12 +5,19 @@ namespace World
 {
     public abstract class CiObject : MonoBehaviour, ICollisionInteractable
     {
-        bool ICollisionInteractable.CompareTag(string value) => CompareTag(value);
+        [Obsolete] bool ICollisionInteractable.CompareTag(string value) => CompareTag(value);
 
         public event Action OnEnterEvent;
         public void OnEnter() => OnEnterEvent?.Invoke();
 
+        public abstract CiType GetCiType { get; }
         public abstract Collider Col { get; }
         public abstract bool CanInteract { get; }
+    }
+
+    public enum CiType
+    {
+        Source,
+        Factory
     }
 }

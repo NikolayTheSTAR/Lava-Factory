@@ -14,6 +14,7 @@ namespace World
         [SerializeField] private Collider ciCollider;
         [SerializeField] private FactoryType factoryType;
 
+        public override CiType GetCiType => CiType.Factory;
         public override bool CanInteract => !_isSending && (_itemsInStorageCount + _itemsOnWayCount) < _factoryData.NeededFromItemCount;
         public override Collider Col => ciCollider;
 

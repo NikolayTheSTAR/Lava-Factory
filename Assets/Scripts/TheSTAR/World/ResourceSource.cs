@@ -23,6 +23,7 @@ namespace World
         
         public event Action OnCompleteFarmEvent;
 
+        public override CiType GetCiType => CiType.Source;
         public override Collider Col => ciCollider;
         public override bool CanInteract => !IsEmpty;
         public bool IsEmpty { get; private set; }

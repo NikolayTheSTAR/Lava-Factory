@@ -8,4 +8,10 @@ namespace World
     {
 
     }
+
+    public enum RoleType
+    {
+        Miner,
+        Crafter
+    }
 }
