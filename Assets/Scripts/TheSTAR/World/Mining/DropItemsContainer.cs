@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using World;
 using Random = UnityEngine.Random;
+using TheSTAR.Utility;
 
 namespace Mining
 { 
@@ -58,7 +59,7 @@ namespace Mining
             var item = GetItemFromPool(itemType, startPos);
             item.transform.localScale = Vector3.zero;
             
-            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => WaitingUtility.Wait(_dropWaitAfterCreateTime, FlyToReceiver));
+            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => TimeUtility.Wait(_dropWaitAfterCreateTime, FlyToReceiver));
 
             void FlyToReceiver()
             {

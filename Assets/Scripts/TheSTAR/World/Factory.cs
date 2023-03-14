@@ -5,6 +5,7 @@ using Configs;
 using Mining;
 using UnityEngine;
 using Tutorial;
+using TheSTAR.Utility;
 
 namespace World
 {
@@ -57,7 +58,7 @@ namespace World
 
             // wait for craft
 
-            WaitingUtility.Wait(_factoryData.CraftTime, () =>
+            TimeUtility.Wait(_factoryData.CraftTime, () =>
             {
                 for (var i = 0; i < _factoryData.ResultToItemCount; i++)
                     _dropItemAction(this, _factoryData.ToItemType);

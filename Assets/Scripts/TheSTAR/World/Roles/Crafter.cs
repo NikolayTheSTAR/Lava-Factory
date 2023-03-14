@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using TheSTAR.Utility;
 
 namespace World
 {
@@ -12,7 +13,7 @@ namespace World
 
         private Factory _currentFactory;
         private List<Factory> _availableFactories;
-        private Coroutine _craftCoroutine;
+        private TimeCycleControl _craftCycle;
         private TransactionsController _transactions;
 
         private Action<Factory> _dropToFactoryAction;
@@ -45,27 +46,23 @@ namespace World
             _crafting = true;
             _currentFactory = factory;
 
-            if (_craftCoroutine != null) StopCoroutine(_craftCoroutine);
-            _craftCoroutine = StartCoroutine(CraftCor());
+            if (_craftCycle != null) _craftCycle.Stop();
+
+            _craftCycle = TimeUtility.DoWhile(() => _crafting, _dropToFactoryPeriod, () =>
+            {
+                if (_currentFactory.CanInteract) _dropToFactoryAction(_currentFactory);
+            });
         }
 
         public void StopCraft()
         {
             _crafting = false;
-            if (_craftCoroutine != null) StopCoroutine(_craftCoroutine);
+
+            if (_craftCycle != null) _craftCycle.Stop();
+
             _currentFactory = null;
 
             OnStopCraftEvent?.Invoke();
-        }
-
-        private IEnumerator CraftCor()
-        {
-            while (_crafting)
-            {
-                if (_currentFactory.CanInteract) _dropToFactoryAction(_currentFactory);
-                yield return new WaitForSeconds(_dropToFactoryPeriod);
-            }
-            yield return null;
         }
 
         public void RetryInteract(out bool successful)
