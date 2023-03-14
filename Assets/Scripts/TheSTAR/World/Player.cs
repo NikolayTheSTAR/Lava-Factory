@@ -137,15 +137,14 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
     private void StartInteract(ResourceSource source) => miner.StartMining(source);
     private void StartInteract(Factory factory) => crafter.StartCraft(factory);
 
-    private void StopInteract(ResourceSource source) => miner.StopMining(source);
-    private void StopInteract(Factory factory) => crafter.StopCraft();
-
-    [Obsolete]
     public void StopInteract()
     {
         if (miner.CurrentSource != null) StopInteract(miner.CurrentSource);
         if (crafter.CurrentFactory != null) StopInteract(crafter.CurrentFactory);
     }
+
+    private void StopInteract(ResourceSource source) => miner.StopMining(source);
+    private void StopInteract(Factory factory) => crafter.StopCraft();
 
     public void RetryInteract()
     {

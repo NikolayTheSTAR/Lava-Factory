@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace World
 {
-    public abstract class CiObject : MonoBehaviour, ICollisionInteractable
+    public abstract class CiObject : MonoBehaviour
     {
         public event Action OnEnterEvent;
         public void OnEnter() => OnEnterEvent?.Invoke();

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace World
 {
-    public class Miner : Role
+    public class Miner : MonoBehaviour
     {
         private int _animLTID = -1;
         private bool _isMining = false;
