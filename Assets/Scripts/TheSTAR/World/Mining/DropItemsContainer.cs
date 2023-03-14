@@ -58,7 +58,7 @@ namespace Mining
             var item = GetItemFromPool(itemType, startPos);
             item.transform.localScale = Vector3.zero;
             
-            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => { LeanTween.value(0, 1, _dropWaitAfterCreateTime).setOnComplete(FlyToReceiver);});
+            LeanTween.scale(item.gameObject, Vector3.one, 0.2f).setOnComplete(() => WaitingUtility.Wait(_dropWaitAfterCreateTime, FlyToReceiver));
 
             void FlyToReceiver()
             {

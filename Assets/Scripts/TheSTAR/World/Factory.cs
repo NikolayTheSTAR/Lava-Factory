@@ -54,12 +54,12 @@ namespace World
             _itemsInStorageCount = 0;
             OnEmptyStorageEvent?.Invoke(_index);
             _isSending = true;
-            
+
             // wait for craft
-            
-            LeanTween.value(0, 1, _factoryData.CraftTime).setOnComplete(() =>
+
+            WaitingUtility.Wait(_factoryData.CraftTime, () =>
             {
-                for (var i = 0; i < _factoryData.ResultToItemCount; i++) 
+                for (var i = 0; i < _factoryData.ResultToItemCount; i++)
                     _dropItemAction(this, _factoryData.ToItemType);
             });
         }
