@@ -47,10 +47,10 @@ MonoBehaviour:
     _dropItemType: 2
     _miningData:
       _miningPeriod: 0.8
-      _oneHitDropCount: 2
-      _maxHitsCount: 6
+      _oneHitDropCount: 1
+      _maxHitsCount: 1
       _recoveryTime:
-        seconds: 15
+        seconds: 10
         minutes: 0
         hours: 0
   - _sourceType: 4

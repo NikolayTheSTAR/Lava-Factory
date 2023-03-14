@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using TheSTAR.Utility;
 
 namespace World
 {
@@ -14,10 +15,11 @@ namespace World
 
         private List<ResourceSource> _availableSource;
         private ResourceSource _currentSource;
-        private Coroutine _mineCoroutine;
+        private TimeCycleControl _miningCycle;
         private Transform _visualTran;
 
         public ResourceSource CurrentSource => _currentSource;
+        public bool IsMining => _isMining;
 
         public event Action OnStopMiningEvent;
 
@@ -48,8 +50,9 @@ namespace World
 
             _isMining = true;
 
-            if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
-            _mineCoroutine = StartCoroutine(MiningCor());
+            if (_miningCycle != null) _miningCycle.Stop();
+
+            _miningCycle = TimeUtility.DoWhile(() => _isMining, _mineStrikePeriod, DoMineStrike);
         }
 
         public void StopMining(ResourceSource rs)
@@ -60,19 +63,9 @@ namespace World
             _isMining = false;
             BreakAnim();
 
-            if (_mineCoroutine != null) StopCoroutine(_mineCoroutine);
+            if (_miningCycle != null) _miningCycle.Stop();
 
             OnStopMiningEvent?.Invoke();
-        }
-
-        private IEnumerator MiningCor()
-        {
-            while (_isMining)
-            {
-                DoMineStrike();
-                yield return new WaitForSeconds(_mineStrikePeriod);
-            }
-            yield return null;
         }
 
         private void DoMineStrike()
@@ -82,11 +75,11 @@ namespace World
             var animTimeMultiply = _mineStrikePeriod > DefaultMineStrikeTime ? 1 : (_mineStrikePeriod / DefaultMineStrikeTime * 0.9f);
 
             _animLTID =
-                LeanTween.scaleY(_visualTran.gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
-                {
-                    _animLTID =
-                        LeanTween.scaleY(_visualTran.gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
-                }).id;
+            LeanTween.scaleY(_visualTran.gameObject, 1.2f, DefaultMineStrikeTime * 0.8f * animTimeMultiply).setOnComplete(() =>
+            {
+                _animLTID =
+                    LeanTween.scaleY(_visualTran.gameObject, 1f, DefaultMineStrikeTime * 0.2f * animTimeMultiply).setOnComplete(() => _currentSource.TakeHit()).id;
+            }).id;
         }
 
         private void BreakAnim()
@@ -95,6 +88,13 @@ namespace World
             LeanTween.cancel(_animLTID);
             _visualTran.localScale = Vector3.one;
             _animLTID = -1;
+        }
+
+        public void RetryInteract(ResourceSource source)
+        {
+            if (_isMining || !_availableSource.Contains(source)) return;
+
+            RetryInteract(out _);
         }
 
         public void RetryInteract(out bool successful)

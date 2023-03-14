@@ -17,7 +17,7 @@ namespace World
         private int _animLTID = -1;
         private Action<IDropSender, ItemType> _dropItemAction;
         private Action<ResourceSource> _onEmptying;
-        private Action _onRecovery;
+        private Action<ResourceSource> _onRecovery;
         private int _health = 1;
         private SourceData _sourceData;
         
@@ -31,7 +31,7 @@ namespace World
         public SourceType SourceType => sourceType;
         public SourceData SourceData => _sourceData;
 
-        public void Init(SourceData sourceData, Action<IDropSender, ItemType> dropItemAction, Action<ResourceSource> onEmptying, Action onRecovery)
+        public void Init(SourceData sourceData, Action<IDropSender, ItemType> dropItemAction, Action<ResourceSource> onEmptying, Action<ResourceSource> onRecovery)
         {
             _sourceData = sourceData;
             _dropItemAction = dropItemAction;
@@ -83,7 +83,7 @@ namespace World
             emptyVisual.SetActive(false);
             IsEmpty = false;
             _health = _sourceData.MiningData.MaxHitsCount;
-            _onRecovery?.Invoke();
+            _onRecovery?.Invoke(this);
             
             // anim
             

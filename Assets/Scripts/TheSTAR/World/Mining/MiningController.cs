@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Configs;
 using UnityEngine;
 using World;
+using TheSTAR.Utility;
 
 namespace Mining
 {
@@ -34,8 +35,6 @@ namespace Mining
         private Dictionary<ItemType, ResourceItem> _loadedItemPrefabs;
         private List<RecoveryData> _recoveryDatas = new List<RecoveryData>();
         private bool _isWaitForRecovery = false;
-        private float _tik;
-        private const float NeededTikValue = 1;
 
         private string ItemLoadPath(ItemType itemType) => $"Items/{itemType.ToString()}";
 
@@ -55,39 +54,56 @@ namespace Mining
 
         public void StartSourceRecovery(ResourceSource source)
         {
-            var recoveryDateTime = 
-                DateTime.Now + 
-                new TimeSpan(
-                    source.SourceData.MiningData.RecoveryTime.Hours, 
+            var recoveryTimeSpan = new TimeSpan(
+                    source.SourceData.MiningData.RecoveryTime.Hours,
                     source.SourceData.MiningData.RecoveryTime.Minutes,
                     source.SourceData.MiningData.RecoveryTime.Seconds);
-            
-            var recoveryData = new RecoveryData(source, recoveryDateTime);
-            
-            _recoveryDatas.Add(recoveryData);
-            _isWaitForRecovery = true;
-        }
 
-        private void Update()
-        {
-            if (!_isWaitForRecovery) return;
-            
-            _tik += Time.deltaTime;
-            if (!(_tik > NeededTikValue)) return;
-            _tik = 0;
-            
-            CheckRecovery();
+            var recoveryDateTime = DateTime.Now + recoveryTimeSpan;
+
+            var recoveryData = new RecoveryData(source, recoveryDateTime);
+
+            _recoveryDatas.Add(recoveryData);
+
+            if (!_isWaitForRecovery)
+            {
+                TimeUtility.Wait((float)recoveryTimeSpan.TotalSeconds, CheckRecovery);
+                _isWaitForRecovery = true;
+            }
         }
 
         private void CheckRecovery()
         {
-            var testRecoveryData = _recoveryDatas[0];
+            bool breakCheck = false;
 
-            if (DateTime.Now < testRecoveryData.recoveryTime) return;
-            
-            testRecoveryData.source.Recovery();
-            _recoveryDatas.Remove(testRecoveryData);
-            _isWaitForRecovery = false;
+            while (!breakCheck)
+            {
+                if (_recoveryDatas.Count == 0)
+                {
+                    breakCheck = true;
+                    continue;
+                }
+
+                var testRecoveryData = _recoveryDatas[0];
+
+                if (DateTime.Now < testRecoveryData.recoveryTime)
+                {
+                    breakCheck = true;
+                    continue;
+                }
+
+                testRecoveryData.source.Recovery();
+                _recoveryDatas.Remove(testRecoveryData);
+            }
+
+            if (_recoveryDatas.Count > 0)
+            {
+                var source = _recoveryDatas[0];
+                var waitTime = source.recoveryTime - DateTime.Now;
+
+                TimeUtility.Wait((float)waitTime.TotalSeconds, CheckRecovery);
+            }
+            else _isWaitForRecovery = false;
         }
 
         [Serializable]

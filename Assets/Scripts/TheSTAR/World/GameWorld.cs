@@ -39,7 +39,8 @@ namespace World
                 {
                     CurrentPlayer.StopInteract();
                     _miningController.StartSourceRecovery(s);
-                }, () => CurrentPlayer.RetryInteract());
+                },
+                CurrentPlayer.RetryInteract);
             }
 
             FactoryData factoryData = null;

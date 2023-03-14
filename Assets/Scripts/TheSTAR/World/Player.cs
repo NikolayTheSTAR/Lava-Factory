@@ -103,7 +103,10 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             var s = other.GetComponent<ResourceSource>();
             miner.AddAvailableSource(s);
             s.OnEnter();
+
+            if (miner.IsMining) return;
             if (!s.CanInteract) return;
+
             StartInteract(s);
         }
         else if (other.CompareTag("Factory"))
@@ -111,6 +114,7 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
             var f = other.GetComponent<Factory>();
             crafter.AddAvailableFactory(f);
             f.OnEnter();
+
             if (!f.CanInteract) return;
             if (!_isMoving) StartInteract(f);
         }
@@ -153,6 +157,8 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
         if (!_isMoving) crafter.RetryInteract(out _);
     }
+
+    public void RetryInteract(ResourceSource source) => miner.RetryInteract(source);
 
     #endregion
 
