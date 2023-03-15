@@ -34,9 +34,8 @@ namespace Mining
         
         private Dictionary<ItemType, ResourceItem> _loadedItemPrefabs;
         private List<RecoveryData> _recoveryDatas = new List<RecoveryData>();
-        private bool _isWaitForRecovery = false;
 
-        private string ItemLoadPath(ItemType itemType) => $"Items/{itemType.ToString()}";
+        private string ItemLoadPath(ItemType itemType) => $"Items/{itemType}";
 
         public void Init()
         {
@@ -60,22 +59,39 @@ namespace Mining
                     source.SourceData.MiningData.RecoveryTime.Seconds);
 
             var recoveryDateTime = DateTime.Now + recoveryTimeSpan;
-
             var recoveryData = new RecoveryData(source, recoveryDateTime);
 
-            _recoveryDatas.Add(recoveryData);
-
-            if (!_isWaitForRecovery)
+            int urgency = GetSourceUrgency(recoveryData);
+            if (urgency == -1) _recoveryDatas.Add(recoveryData);
+            else
             {
-                TimeUtility.Wait((float)recoveryTimeSpan.TotalSeconds, CheckRecovery);
-                _isWaitForRecovery = true;
+                _recoveryDatas.Insert(urgency, recoveryData);
+
+                if (urgency == 0)
+                {
+                    TimeUtility.Wait((float)recoveryTimeSpan.TotalSeconds, CheckRecovery);
+                    recoveryData.OnStartWaiting();
+                }
             }
+        }
+
+        private int GetSourceUrgency(RecoveryData current)
+        {
+            if (_recoveryDatas.Count == 0) return 0;
+
+            for (int i = 0; i < _recoveryDatas.Count; i++)
+            {
+                if (current.RecoveryTime < _recoveryDatas[i].RecoveryTime) return i;
+            }
+
+            return -1;
         }
 
         private void CheckRecovery()
         {
             bool breakCheck = false;
 
+            // recovery now
             while (!breakCheck)
             {
                 if (_recoveryDatas.Count == 0)
@@ -86,37 +102,43 @@ namespace Mining
 
                 var testRecoveryData = _recoveryDatas[0];
 
-                if (DateTime.Now < testRecoveryData.recoveryTime)
+                if (DateTime.Now < testRecoveryData.RecoveryTime)
                 {
                     breakCheck = true;
                     continue;
                 }
 
-                testRecoveryData.source.Recovery();
+                testRecoveryData.Source.Recovery();
                 _recoveryDatas.Remove(testRecoveryData);
             }
 
+            // next recovery for waiting
             if (_recoveryDatas.Count > 0)
             {
-                var source = _recoveryDatas[0];
-                var waitTime = source.recoveryTime - DateTime.Now;
+                var recoveryData = _recoveryDatas[0];
+                if (recoveryData.IsWaiting) return;
+
+                var waitTime = recoveryData.RecoveryTime - DateTime.Now;
 
                 TimeUtility.Wait((float)waitTime.TotalSeconds, CheckRecovery);
+                recoveryData.OnStartWaiting();
             }
-            else _isWaitForRecovery = false;
         }
 
         [Serializable]
         private class RecoveryData
         {
-            public ResourceSource source { get; private set; }
-            public DateTime recoveryTime { get; private set; }
+            public ResourceSource Source { get; private set; }
+            public DateTime RecoveryTime { get; private set; }
+            public bool IsWaiting { get; private set; }
 
             public RecoveryData(ResourceSource source, DateTime time)
             {
-                this.source = source;
-                this.recoveryTime = time;
+                Source = source;
+                RecoveryTime = time;
             }
+
+            public void OnStartWaiting() => IsWaiting = true;
         }
     }
 }

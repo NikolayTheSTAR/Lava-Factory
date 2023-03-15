@@ -7,6 +7,8 @@ using TheSTAR.Input;
 using Tutorial;
 using UnityEngine;
 using World;
+using System.Diagnostics;
+using System.Threading;
 
 public class GameController : MonoBehaviour
 {
@@ -19,7 +21,6 @@ public class GameController : MonoBehaviour
     [SerializeField] private TransactionsController transactions;
     [SerializeField] private GuiController gui;
     [SerializeField] private TutorialController tutorial;
-    //[SerializeField] private WaitingUtility waiting;
 
     [Space] [SerializeField] private float startGameDelay = 0.5f;
 

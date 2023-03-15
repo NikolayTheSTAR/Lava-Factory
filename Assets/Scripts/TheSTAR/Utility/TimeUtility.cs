@@ -7,11 +7,11 @@ namespace TheSTAR.Utility
 {
     public static class TimeUtility
     {
-        public static void Wait(float time, Action action) => Wait((int)(time * 1000), action);
+        public static void Wait(float timeSeconds, Action action) => Wait((int)(timeSeconds * 1000), action);
 
-        public async static void Wait(int time, Action action)
+        public async static void Wait(int timeMilliseconds, Action action)
         {
-            await Task.Run(() => Thread.Sleep(time));
+            await Task.Run(() => Task.Delay(timeMilliseconds));
             action?.Invoke();
         }
 
@@ -30,16 +30,26 @@ namespace TheSTAR.Utility
             return control;
         }
 
-        private async static void WaitWhile(WaitWhileCondition condition, int timeMilliseconds, Action action, TimeCycleControl control)
+        private static void WaitWhile(WaitWhileCondition condition, int timeMilliseconds, Action action, TimeCycleControl control)
         {
             if (control.IsBreak) return;
 
-            while (condition.Invoke())
+            Wait(timeMilliseconds, () =>
             {
-                await Task.Run(() => Thread.Sleep(timeMilliseconds));
                 if (control.IsBreak) return;
+
                 action?.Invoke();
-            }
+
+                if (!condition.Invoke()) return;
+
+                WaitWhile(condition, timeMilliseconds, action, control);
+            });
+        }
+
+        private enum CycleStatus
+        {
+            Alive,
+            Breaked
         }
 
         public delegate bool WaitWhileCondition();
