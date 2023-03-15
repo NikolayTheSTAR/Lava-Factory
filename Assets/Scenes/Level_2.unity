@@ -8263,6 +8263,7 @@ MonoBehaviour:
   - {fileID: 1008441331}
   - {fileID: 1967557398}
   playerPrefab: {fileID: 7452998440400282464, guid: 1528ab92f778a4480a936f508b11e382, type: 3}
+  levelIndex: 2
 --- !u!1001 &1491189670
 PrefabInstance:
   m_ObjectHideFlags: 0

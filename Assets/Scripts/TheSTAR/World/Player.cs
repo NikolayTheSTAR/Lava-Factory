@@ -12,9 +12,10 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 {
     [SerializeField] private NavMeshAgent meshAgent;
     [SerializeField] private Transform visualTran;
-    [SerializeField] private Miner miner;
-    [SerializeField] private Crafter crafter;
     [SerializeField] private EntranceTrigger trigger;
+
+    private Miner miner;
+    private Crafter crafter;
 
     private bool _isMoving = false;
     public event Action OnMoveEvent;
@@ -34,9 +35,11 @@ public class Player : MonoBehaviour, ICameraFocusable, IJoystickControlled, IDro
 
     public void Init(TransactionsController transactions, Action<Factory> dropToFactoryAction, float dropToFactoryPeriod)
     {
+        miner = new();
         miner.Init(visualTran);
         miner.OnStopMiningEvent += RetryInteract;
 
+        crafter = new();
         crafter.Init(transactions, dropToFactoryPeriod, dropToFactoryAction);
         crafter.OnStopCraftEvent += RetryInteract;
 

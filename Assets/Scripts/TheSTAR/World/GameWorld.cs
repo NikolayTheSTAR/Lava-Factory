@@ -13,6 +13,7 @@ namespace World
         [SerializeField] private ResourceSource[] sources = new ResourceSource[0];
         [SerializeField] private Factory[] factories = new Factory[0];
         [SerializeField] private Player playerPrefab;
+        [SerializeField] private int levelIndex;
     
         public Player CurrentPlayer { get; private set; }
 
@@ -53,17 +54,17 @@ namespace World
                 if (factory == null) continue;
                 
                 factoryData = transactions.FactoriesConfig.FactoryDatas[(int)factory.FactoryType];
-                factory.Init(i, factoryData, dropItemsContainer.DropFromSenderToPlayer, data.gameData.GetFactoryStorageValue(i));
+                factory.Init(i, factoryData, dropItemsContainer.DropFromSenderToPlayer, data.gameData.GetFactoryStorageValue(levelIndex, i));
 
                 factory.OnAddItemToStorageEvent += (index, value) =>
                 {
-                    data.gameData.AddItemToFactoryStorage(index, value);
+                    data.gameData.AddItemToFactoryStorage(levelIndex, index, value);
                     data.Save();
                 };
 
                 factory.OnEmptyStorageEvent += (index) =>
                 {
-                    data.gameData.EmptyFactoryStorage(index);
+                    data.gameData.EmptyFactoryStorage(levelIndex, index);
                     data.Save();
                 };
             }

@@ -6,7 +6,7 @@ using TheSTAR.Utility;
 
 namespace World
 {
-    public class Miner : MonoBehaviour
+    public class Miner
     {
         private int _animLTID = -1;
         private bool _isMining = false;

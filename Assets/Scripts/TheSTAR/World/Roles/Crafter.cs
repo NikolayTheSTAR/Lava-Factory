@@ -6,7 +6,7 @@ using TheSTAR.Utility;
 
 namespace World
 {
-    public class Crafter : MonoBehaviour
+    public class Crafter
     {
         private float _dropToFactoryPeriod = 1;
         private bool _crafting = false;

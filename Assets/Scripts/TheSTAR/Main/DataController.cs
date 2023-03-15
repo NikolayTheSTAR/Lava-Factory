@@ -60,7 +60,7 @@ namespace TheSTAR.Data
         {
             public Dictionary<ItemType, int> items = new();
             public Dictionary<string, bool> completedTutorials = new();
-            public Dictionary<int, int> factoriesStorageData = new();
+            public Dictionary<int, Dictionary<int, int>> levelFactoryData = new();
 
             public void AddItems(ItemType itemType, int count, out int result)
             {
@@ -90,23 +90,35 @@ namespace TheSTAR.Data
                 return false;
             }
 
-            public void AddItemToFactoryStorage(int factoryIndex, int value)
+            private Dictionary<int, int> GetFactoriesInLevelData(int levelIndex)
             {
-                if (factoriesStorageData.ContainsKey(factoryIndex)) factoriesStorageData[factoryIndex] += value;
-                else factoriesStorageData.Add(factoryIndex, value);
+                if (!levelFactoryData.ContainsKey(levelIndex)) levelFactoryData.Add(levelIndex, new Dictionary<int, int>());
+                return levelFactoryData[levelIndex];
             }
 
-            public void EmptyFactoryStorage(int factoryIndex) => SetItemToFactoryStorage(factoryIndex, 0);
-
-            public void SetItemToFactoryStorage(int factoryIndex, int value)
+            public void AddItemToFactoryStorage(int levelIndex, int factoryIndex, int value)
             {
-                if (factoriesStorageData.ContainsKey(factoryIndex)) factoriesStorageData[factoryIndex] = value;
-                else factoriesStorageData.Add(factoryIndex, value);
+                var factoriesInLevelData = GetFactoriesInLevelData(levelIndex);
+
+                if (factoriesInLevelData.ContainsKey(factoryIndex)) factoriesInLevelData[factoryIndex] += value;
+                else factoriesInLevelData.Add(factoryIndex, value);
             }
 
-            public int GetFactoryStorageValue(int factoryIndex)
+            public void EmptyFactoryStorage(int levelIndex, int factoryIndex) => SetItemToFactoryStorage(levelIndex, factoryIndex, 0);
+
+            public void SetItemToFactoryStorage(int levelIndex, int factoryIndex, int value)
             {
-                if (factoriesStorageData.ContainsKey(factoryIndex)) return factoriesStorageData[factoryIndex];
+                var factoriesInLevelData = GetFactoriesInLevelData(levelIndex);
+
+                if (factoriesInLevelData.ContainsKey(factoryIndex)) factoriesInLevelData[factoryIndex] = value;
+                else factoriesInLevelData.Add(factoryIndex, value);
+            }
+
+            public int GetFactoryStorageValue(int levelIndex, int factoryIndex)
+            {
+                var factoriesInLevelData = GetFactoriesInLevelData(levelIndex);
+
+                if (factoriesInLevelData.ContainsKey(factoryIndex)) return factoriesInLevelData[factoryIndex];
                 else return 0;
             }
         }
