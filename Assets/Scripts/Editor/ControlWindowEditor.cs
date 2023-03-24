@@ -2,9 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using TheSTAR.Utility;
+using ColorUtility = TheSTAR.Utility.ColorUtility;
 
 public class ControlWindowEditor : EditorWindow
 {
@@ -16,12 +15,9 @@ public class ControlWindowEditor : EditorWindow
 
     private Color
         initialColor,
-        grayColor,
         lightColor,
         contrastColor,
         faintColor;
-
-    private readonly Color maxFaintColor = new Color(0.5f, 0.5f, 0.5f, 1);
 
     private string GetLevelPath => $"Assets/Scenes/Level_{levelIndex}.unity";
 
@@ -69,28 +65,14 @@ public class ControlWindowEditor : EditorWindow
             case ControlWindowState.ColorTest:
                 if (GUILayout.Button("Back")) state = ControlWindowState.Test;
 
+                EditorGUILayout.Space(10);
                 initialColor = EditorGUILayout.ColorField("Initial", initialColor);
+                EditorGUILayout.Space(10);
 
-                // faint
-
-                faintColor = initialColor - (initialColor - maxFaintColor) / 2;
-                EditorGUILayout.ColorField("Faint", faintColor);
-
-                // contrast
-
-                contrastColor = initialColor + (initialColor - maxFaintColor) / 2;
-                EditorGUILayout.ColorField("Contrast", contrastColor);
-
-                // gray
-
-                float value = (initialColor.r + initialColor.g + initialColor.b)/3;
-                grayColor = new Color(value, value, value, initialColor.a);
-                EditorGUILayout.ColorField("Gray", grayColor);
-
-                // light
-
-                lightColor = new Color(initialColor.r * LightValue, initialColor.g * LightValue, initialColor.b * LightValue, initialColor.a);
-                EditorGUILayout.ColorField("Light", lightColor);
+                EditorGUILayout.ColorField("Faint", ColorUtility.Faint(initialColor));
+                EditorGUILayout.ColorField("Contrast", ColorUtility.Contrast(initialColor));
+                EditorGUILayout.ColorField("Gray", ColorUtility.Gray(initialColor));
+                EditorGUILayout.ColorField("Light", ColorUtility.Light(initialColor, LightValue));
 
                 break;
         }
