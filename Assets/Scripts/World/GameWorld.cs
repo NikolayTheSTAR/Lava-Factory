@@ -7,7 +7,7 @@ using TheSTAR.Data;
 
 namespace World
 {
-    public class GameWorld : MonoBehaviour
+    public class GameWorld : MonoBehaviour, IPreparable
     {
         [SerializeField] private Transform playerSpawnPoint;
         [SerializeField] private ResourceSource[] sources = new ResourceSource[0];
@@ -76,16 +76,16 @@ namespace World
             CurrentPlayer.Init(_transactions, _dropItemsContainer.DropToFactory, _transactions.FactoriesConfig.DropToFactoryPeriod);
         }
         
-        #if UNITY_EDITOR
-
-        [ContextMenu("RegisterSources")]
-        private void RegisterSources()
+        [ContextMenu("Prepare")]
+        public void Prepare()
         {
+#if UNITY_EDITOR
             var allSources = GameObject.FindGameObjectsWithTag("Source");
-            var tempSources = allSources.Select(sourceObject => sourceObject.GetComponent<ResourceSource>()).Where(s => s != null).ToArray();
-            sources = tempSources;
+            sources = allSources.Select(s => s.GetComponent<ResourceSource>()).Where(s => s != null).ToArray();
+
+            var allFactories = GameObject.FindGameObjectsWithTag("Factory");
+            factories = allFactories.Select(f => f.GetComponent<Factory>()).Where(f => f != null).ToArray();
+#endif
         }
-        
-        #endif
     }
 }
